@@ -1,0 +1,41 @@
+---
+title: "NBA Analysis"
+author: "Marco Lagos"
+date: "2023-04-06"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read in the data sets (advanced_stats.csv, nba_salaries.csv, nba_team_wins.csv, 
+shooting_opponent.csv, shooting_team.csv, total_opponent.csv, total_team.csv)
+```{r}
+nba_salaries <- read.csv("./data/nba_salaries.csv")
+nba_team_wins <- read.csv("./data/nba_team_wins.csv")
+
+advanced_stats <- read.csv("./data/advanced_stats.csv")
+
+shooting_stats <- read.csv("./data/shooting_team.csv")
+opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
+
+total_stats <- read.csv("./data/total_team.csv")
+opponent_total_stats <- read.csv("./data/total_opponent.csv")
+
+View(nba_salaries)
+View(nba_team_wins)
+View(advanced_stats)
+View(shooting_stats)
+View(opponent_shooting_stats)
+View(total_stats)
+View(opponent_total_stats)
+```
+
+Linear regression plot of team wins on total team salary. There needs to be 
+inflation adjustment to the previous years so that salary is consistent. Then,
+we will plot the the team wins to the total adjusted team salary by year.
+```{r}
+```
+
+

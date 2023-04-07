@@ -21,3 +21,4 @@ for directory in directories:
     substring = directory[second_last_slash_index+1:last_slash_index]
     new_excel_sheet = "./combined_data/" + substring + ".csv"
     all_data.to_csv(new_excel_sheet, index=False)
+    data=[]
