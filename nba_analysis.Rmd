@@ -77,6 +77,8 @@ adjusted_nba_salaries <- adjust_salary_gdp_deflator(base_year, nba_salaries, gdp
 
 total_salary <- adjusted_nba_salaries %>% group_by(year, team) %>% summarize(total_salary = sum(adjusted_salary))
 
+# colnames(total_salary) is "year", "team", "total_salary"
+
 create_total_salary_to_wins <- function(total_salary, wins) {
 	wins_long <- nba_team_wins %>% pivot_longer(cols = names(nba_team_wins)[-1], names_to="team", values_to = "wins") %>% mutate(team = str_replace_all(team, "\\.", " "))
 	
@@ -88,9 +90,90 @@ create_total_salary_to_wins <- function(total_salary, wins) {
 	return(merged_data)
 }
 total_salary_to_wins <- create_total_salary_to_wins(total_salary, nba_team_wins)
+# colnames(total_salary_to_wins) is "year", "team", "total_salary", and "wins"
 total_salary_to_wins <- na.omit(total_salary_to_wins)
-```
 
+# total_salary column for 2000, Atlanta Hawks was 23346098.
+# Total wins for 2000, Atlanta Hawks was 25.
+
+```
+```{r}
+
+# Get rid of the asterisks in every Team Name in advanced_stats.csv
+advanced_stats <- read.csv("./data/advanced_stats.csv")
+advanced_stats
+advanced_stats$team <- stringr::str_replace(advanced_stats$team, '\\*', '')
+advanced_stats
+
+# names(advanced_stats)[] = "new_column_name"
+
+# append = FALSE will destroy the existing file and then replace it with the variable
+# advanced_stats which we are writing to that file.
+# quote = FALSE will make sure that no elements are surrounded by quotation marks
+# when we write these elements to the file.
+# write.csv(advanced_stats, "./data/advanced_stats_without_asterisk.csv", append = FALSE, quote = FALSE)
+
+# NOTE: The "Unnamed: 17", "Unnamed: 22", and "Unnamed: 27" columns of advanced_stats are
+# not useful. They contain
+# empty values or no values (idk). Just do not use these three columns.
+
+
+create_wins_long <- function(wins) {
+  # NOTE THAT THIS FUNCTION USES nba_team_wins, I THINK IT SHOULD TECHNICALLY USE "wins"
+  # which is more specific to what was actually passed into this function create_wins_long.
+	wins_long <- nba_team_wins %>% pivot_longer(cols = names(nba_team_wins)[-1], names_to="team", values_to = "wins") %>% mutate(team = str_replace_all(team, "\\.", " "))
+	
+	wins_long$team <- str_to_lower(str_trim(wins_long$team))
+	
+	return(wins_long)
+}
+
+# nba_team_wins
+wins_long_res <- create_wins_long(nba_team_wins)
+wins_long_res
+
+# Assume that every string in the "team" column of wins_long_inside
+# has already been trimmed and converted to lower case, BEFORE you pass it
+# into this function.
+create_advanced_stats_to_wins <- function(advanced_stats_inside, wins_long_inside) {
+	
+  # All the team names in wins_long$team is already trimmed and converted to lower case.
+  # Therefore we should trim and convert to lower case all the team names inside
+  # advanced_stats_inside.
+	advanced_stats_inside$team <- str_to_lower(str_trim(advanced_stats_inside$team))
+	
+	# advanced_stats_bool_of_team_vec <- ifelse(wins_long_inside.contains(dvanced_stats_inside$team))
+	# advanced_stats_bool_of_year_vec <- ifelse(wins_long_inside.contains(dvanced_stats_inside$team))
+	
+	
+	
+	# MAYBE USE THIS FOR LATER.
+	# advanced_stats_bool_of_team_vec <- ifelse(wins_long_inside.contains(advanced_stats_inside$team)
+	#                                          AND wins_long_inside.contains(advanced_stats_inside$year))
+	
+	# advanced_stats_inside <- advanced_stats_inside[advanced_stats_bool_of_team_vec]
+	
+	
+	#	wins_long_bool_of_team_vec <- ifelse(advanced_stats_inside.contains(wins_long_inside$team)
+	#                                          AND advanced_stats_inside.contains(wins_long_inside$year))
+	
+	# wins_long_inside <- wins_long_inside[wins_long_bool_of_team_vec]
+	
+	
+	
+	# We could do a simple ifelse or a filter that removes all the rows in advanced_stats_inside
+	# and removed all the rows in wins_long_inside that correspond to a year-team combination
+	# that does NOT exist in both advanced_stats_inside and wins_long_inside.
+	
+	# left_join has a argument called "fill = list(wins = 0)"
+	merged_data <- left_join(advanced_stats_inside, wins_long_inside, by = c("year", "team"))
+	# names(merged_data) <- c("year", "team", "total_salary", "wins")
+	return(merged_data)
+}
+
+advanced_stats_to_wins <- create_advanced_stats_to_wins(advanced_stats, wins_long_res)
+advanced_stats_to_wins
+```
 Making the plot of team wins over total salary paid to players for that year. The
 salaries have been adjusted and any NULL wins have been removed.
 ```{r}
@@ -100,5 +183,9 @@ y <- total_salary_to_wins$wins
 model <- lm(y ~ x)
 summary(model)
 plot(x, y)
+
+
+
+
 ```
 
