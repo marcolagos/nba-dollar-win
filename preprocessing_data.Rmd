@@ -124,6 +124,6 @@ adjust_salary_cpi <- function(base_year, salaries, adjuster) {
 }
 
 base_year <- 2020
-adjusted_nba_salaries <- adjust_salary_cpi(base_year, nba_salaries, gdp_deflator)
+adjusted_nba_salaries <- adjust_salary_cpi(base_year, nba_salaries, cpi_by_year)
 write.csv(adjusted_nba_salaries, "./data/adjusted_nba_salaries.csv", row.names = FALSE, quote = FALSE)
 ```
