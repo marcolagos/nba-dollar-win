@@ -7,13 +7,16 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+library(stringr)
 ```
 
 Read in the data sets (advanced_stats.csv, nba_salaries.csv, nba_team_wins.csv, 
 shooting_opponent.csv, shooting_team.csv, total_opponent.csv, total_team.csv)
 ```{r}
 nba_salaries <- read.csv("./data/nba_salaries.csv")
-nba_team_wins <- read.csv("./data/nba_team_wins_Reformatted.csv")
+nba_team_wins <- read.csv("./data/nba_team_wins.csv")
 
 advanced_stats <- read.csv("./data/advanced_stats.csv")
 
@@ -23,9 +26,7 @@ opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
 total_stats <- read.csv("./data/total_team.csv")
 opponent_total_stats <- read.csv("./data/total_opponent.csv")
 
-gdp_deflator <- read.csv("./data/GDP_Deflator_by_Year.csv")
-
-nba_team_wins
+gdp_deflator <- read.csv("./data/gdp_deflator_by_year.csv")
 
 # View(nba_salaries)
 # View(nba_team_wins)
@@ -54,30 +55,50 @@ years. Let us just choose our base year to be 2020.
 Why did we choose 2020 as the base year? Our intentions are to adjust the USD as
 close as we can for the current year, so that viewers can better understand our 
 analysis.
+
 ```{r}
-adjust_salary_gdp_deflator <- function(base_year, nba_salaries) {
-	subset_df <- subset(gdp_deflator, year == base_year)
-	base_year_value <- subset_df$value
+adjust_salary_gdp_deflator <- function(base_year, nba_salaries, gdp_deflator) {
+  base_year_gdp_value <- filter(gdp_deflator, year == base_year)$value
 
-	inflation_factor <- gdp_deflator_2020 / subset(gdp_deflator, year %in% nba_salaries$year)$value
-	
-	nba_salaries$adjusted_salary <- nba_salaries$salary * inflation_factor
-	nba_salaries$adjusted_salary <- nba_salaries$adjusted_salary / subset(gdp_deflator, year %in% nba_salaries$year)$value
-
-	return(nba_salaries)
+  adjusted_salary <- c()
+  for (i in 1:nrow(nba_salaries)) {
+  	current_year <- nba_salaries[i, 6]
+	current_year_gdp_value <- filter(gdp_deflator, year == current_year)$value
+	factor <- base_year_gdp_value / current_year_gdp_value
+	adjusted_salary[i] <- nba_salaries[i, 5] * factor
+  }
+  nba_salaries <- cbind(nba_salaries, adjusted_salary)
+  
+  return(nba_salaries)
 }
+
 base_year <- 2020
-# nba_salaries <- adjust_salary_gdp_deflator(base_year, nba_salaries)
-# View(nba_salaries)
+adjusted_nba_salaries <- adjust_salary_gdp_deflator(base_year, nba_salaries, gdp_deflator)
 
-nba_salaries_team_is_LAL <- ifelse(nba_salaries == "Los Angeles Lakers")
-nba_salaries_team_is_LAL
+total_salary <- adjusted_nba_salaries %>% group_by(year, team) %>% summarize(total_salary = sum(adjusted_salary))
 
-nba_salaries_by_team_and_year <- SOMETHING
-
-mod_basic <- lm(nba_team_wins ~ nba_salaries_by_team_and_year)
-
-
+create_total_salary_to_wins <- function(total_salary, wins) {
+	wins_long <- nba_team_wins %>% pivot_longer(cols = names(nba_team_wins)[-1], names_to="team", values_to = "wins") %>% mutate(team = str_replace_all(team, "\\.", " "))
+	
+	total_salary$team <- str_to_lower(str_trim(total_salary$team))
+	wins_long$team <- str_to_lower(str_trim(wins_long$team))
+	
+	merged_data <- left_join(total_salary, wins_long, by = c("year", "team"))
+	names(merged_data) <- c("year", "team", "total_salary", "wins")
+	return(merged_data)
+}
+total_salary_to_wins <- create_total_salary_to_wins(total_salary, nba_team_wins)
+total_salary_to_wins <- na.omit(total_salary_to_wins)
 ```
 
+Making the plot of team wins over total salary paid to players for that year. The
+salaries have been adjusted and any NULL wins have been removed.
+```{r}
+x <- total_salary_to_wins$total_salary
+y <- total_salary_to_wins$wins
+
+model <- lm(y ~ x)
+summary(model)
+plot(x, y)
+```
 
