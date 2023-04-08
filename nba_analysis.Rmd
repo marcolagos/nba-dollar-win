@@ -23,6 +23,8 @@ opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
 total_stats <- read.csv("./data/total_team.csv")
 opponent_total_stats <- read.csv("./data/total_opponent.csv")
 
+gdp_deflator <- read.csv("./data/GDP_Deflator_by_Year.csv")
+
 View(nba_salaries)
 View(nba_team_wins)
 View(advanced_stats)
@@ -30,12 +32,41 @@ View(shooting_stats)
 View(opponent_shooting_stats)
 View(total_stats)
 View(opponent_total_stats)
+View(gdp_deflator)
 ```
 
 Linear regression plot of team wins on total team salary. There needs to be 
 inflation adjustment to the previous years so that salary is consistent. Then,
 we will plot the the team wins to the total adjusted team salary by year.
+
+We can use different index to make our USD adjustments over the course of the 20
+years. Let us just choose our base year to be 2020.
+1. Consumer Price Index (CPI)
+	- Base Year CPI * (Current Year value / Current Year CPI)
+	- This will give the adjusted amount of USD for that current year according
+	  to the CPI index
+2. Gross Domestic Product Deflator (GDP Deflator)
+	- Base Year GDP * (Current Year value / Current Year GDP)
+	- This will give the adjusted amount of USD for that current year according
+	  to the CPI index
+Why did we choose 2020 as the base year? Our intentions are to adjust the USD as
+close as we can for the current year, so that viewers can better understand our 
+analysis.
 ```{r}
+adjust_salary_gdp_deflator <- function(base_year, nba_salaries) {
+	subset_df <- subset(gdp_deflator, year == base_year)
+	base_year_value <- subset_df$value
+
+	inflation_factor <- gdp_deflator_2020 / subset(gdp_deflator, year %in% nba_salaries$year)$value
+	
+	nba_salaries$adjusted_salary <- nba_salaries$salary * inflation_factor
+	nba_salaries$adjusted_salary <- nba_salaries$adjusted_salary / subset(gdp_deflator, year %in% nba_salaries$year)$value
+
+	return(nba_salaries)
+}
+base_year <- 2020
+nba_salaries <- adjust_salary_gdp_deflator(base_year, nba_salaries)
+View(nba_salaries)
 ```
 
 
