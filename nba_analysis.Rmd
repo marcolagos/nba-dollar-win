@@ -173,6 +173,32 @@ create_advanced_stats_to_wins <- function(advanced_stats_inside, wins_long_insid
 
 advanced_stats_to_wins <- create_advanced_stats_to_wins(advanced_stats, wins_long_res)
 advanced_stats_to_wins
+
+advanced_stats_to_wins <- na.omit(advanced_stats_to_wins)
+advanced_stats_to_wins
+
+```
+Making the plot of team wins over advanced stats for the team for that year. Any NULL wins have been removed.
+```{r}
+
+plot(advanced_stats_to_wins$SOS, advanced_stats_to_wins$wins)
+plot(advanced_stats_to_wins$X3PAr, advanced_stats_to_wins$wins)
+
+advanced_stats_to_wins[3]
+colnames(advanced_stats_to_wins)[3]
+colnames(advanced_stats_to_wins)[29]
+dim(advanced_stats_to_wins)
+
+# Are we using ggplot2 ?
+for (col_i in seq(from = 3, to = 29, by = 1)) {
+  # Column Index 3 should be "Age"
+  # Column Index 29 should be "year"
+  
+  
+  plot(advanced_stats_to_wins[,col_i], advanced_stats_to_wins$wins, xlab = colnames(advanced_stats_to_wins)[col_i], ylab = "wins")
+  
+}
+
 ```
 Making the plot of team wins over total salary paid to players for that year. The
 salaries have been adjusted and any NULL wins have been removed.
