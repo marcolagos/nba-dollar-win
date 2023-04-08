@@ -13,7 +13,7 @@ Read in the data sets (advanced_stats.csv, nba_salaries.csv, nba_team_wins.csv,
 shooting_opponent.csv, shooting_team.csv, total_opponent.csv, total_team.csv)
 ```{r}
 nba_salaries <- read.csv("./data/nba_salaries.csv")
-nba_team_wins <- read.csv("./data/nba_team_wins.csv")
+nba_team_wins <- read.csv("./data/nba_team_wins_Reformatted.csv")
 
 advanced_stats <- read.csv("./data/advanced_stats.csv")
 
@@ -25,14 +25,16 @@ opponent_total_stats <- read.csv("./data/total_opponent.csv")
 
 gdp_deflator <- read.csv("./data/GDP_Deflator_by_Year.csv")
 
-View(nba_salaries)
-View(nba_team_wins)
-View(advanced_stats)
-View(shooting_stats)
-View(opponent_shooting_stats)
-View(total_stats)
-View(opponent_total_stats)
-View(gdp_deflator)
+nba_team_wins
+
+# View(nba_salaries)
+# View(nba_team_wins)
+# View(advanced_stats)
+# View(shooting_stats)
+# View(opponent_shooting_stats)
+# View(total_stats)
+# View(opponent_total_stats)
+# View(gdp_deflator)
 ```
 
 Linear regression plot of team wins on total team salary. There needs to be 
@@ -65,8 +67,17 @@ adjust_salary_gdp_deflator <- function(base_year, nba_salaries) {
 	return(nba_salaries)
 }
 base_year <- 2020
-nba_salaries <- adjust_salary_gdp_deflator(base_year, nba_salaries)
-View(nba_salaries)
+# nba_salaries <- adjust_salary_gdp_deflator(base_year, nba_salaries)
+# View(nba_salaries)
+
+nba_salaries_team_is_LAL <- ifelse(nba_salaries == "Los Angeles Lakers")
+nba_salaries_team_is_LAL
+
+nba_salaries_by_team_and_year <- SOMETHING
+
+mod_basic <- lm(nba_team_wins ~ nba_salaries_by_team_and_year)
+
+
 ```
 
 
