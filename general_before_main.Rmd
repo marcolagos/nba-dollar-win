@@ -41,6 +41,8 @@ advanced_stats
 ```
 
 ```{r}
+
+
 advanced_stats
 class(advanced_stats[,2])
 advanced_stats[,2][1]

@@ -110,6 +110,9 @@ advanced_stats
 total_stats$team <- stringr::str_replace(total_stats$team, '\\*', '')
 total_stats
 
+opponent_total_stats$team <- stringr::str_replace(opponent_total_stats$team, '\\*', '')
+opponent_total_stats
+
 # names(advanced_stats)[] = "new_column_name"
 
 # append = FALSE will destroy the existing file and then replace it with the variable
@@ -190,6 +193,83 @@ total_stats_to_wins
 total_stats_to_wins <- na.omit(total_stats_to_wins)
 total_stats_to_wins
 
+```
+```{r}
+
+opponent_total_stats$team <- stringr::str_replace(opponent_total_stats$team, '\\*', '')
+opponent_total_stats
+
+
+total_with_opponent_total_stats <- left_join(total_stats, opponent_total_stats, by = c("year", "team"))
+total_with_opponent_total_stats
+
+
+# 616 by 27
+total_with_opponent_total_stats_to_wins <- create_advanced_stats_to_wins(total_with_opponent_total_stats, wins_long_res)
+total_with_opponent_total_stats_to_wins
+
+
+# 553 by 27
+total_with_opponent_total_stats_to_wins <- na.omit(total_with_opponent_total_stats_to_wins)
+total_with_opponent_total_stats_to_wins
+
+# 616 x 26, 616 x 50, 616 x 27, 553 x 27
+```
+```{r}
+
+
+# Are we using ggplot2 ?
+
+rsquared_vec <- c()
+rsquared_adj_vec <- c()
+
+col_inds_vec <- seq(from = 3, to = 50, by = 1)
+for (col_i in col_inds_vec) {
+  # Column Index 3 should be "Age"
+  # Column Index 29 should be "year"
+  
+  
+  plot(total_with_opponent_total_stats_to_wins[,col_i], total_with_opponent_total_stats_to_wins$wins, xlab = colnames(total_with_opponent_total_stats_to_wins)[col_i], ylab = "wins")
+  
+  # Warning: NAs introduced by coercionWarning: no non-missing arguments to min; returning InfWarning: no non-missing arguments to max; returning -InfError in plot.window(...) : need finite 'xlim' values
+  
+    cur_mod <- lm(total_with_opponent_total_stats_to_wins$wins ~ total_with_opponent_total_stats_to_wins[,col_i])
+  # names(lm$coefficients) <- c("(Intercept)", "x1")
+  
+  print("HI current col name is")
+  print(colnames(total_with_opponent_total_stats_to_wins)[col_i])
+  # print(summary(cur_mod))
+  print(summary(cur_mod)$r.squared)
+  print(summary(cur_mod)$adj.r.squared)
+  
+  rsquared_vec <- append(rsquared_vec, summary(cur_mod)$r.squared)
+  rsquared_adj_vec <- append(rsquared_adj_vec, summary(cur_mod)$adj.r.squared)
+}
+
+plot(x = col_inds_vec, y = rsquared_vec)
+
+plot(x = col_inds_vec, y = rsquared_adj_vec)
+
+rsquared_vec_sorted <- sort(rsquared_vec, decreasing=TRUE, index.return=TRUE)
+rsquared_vec_sorted
+# rsquared_vec_sorted$x
+
+# total_stats_to_wins[, 2 + element in rsquared_vec_sorted$ix]
+rsquared_vec_sorted$ix
+# 7, 10, 13, 20, 25, 18
+
+for (cur_x_ind in 1:7) {
+  print(colnames(total_with_opponent_total_stats_to_wins)[rsquared_vec_sorted$ix[cur_x_ind] + 2 ])
+}
+
+mult_mod <- lm(total_with_opponent_total_stats_to_wins$wins ~ total_with_opponent_total_stats_to_wins[,35]
+               + total_with_opponent_total_stats_to_wins[,10]
+               + total_with_opponent_total_stats_to_wins[,38]
+               + total_with_opponent_total_stats_to_wins[,13])
+
+summary(mult_mod)
+print(summary(mult_mod)$r.squared)
+print(summary(mult_mod)$adj.r.squared)
 
 
 ```
@@ -264,20 +344,38 @@ for (cur_x_ind in 1:7) {
 
 # FG%, 3P%, 2P%, AST, PTS, DRB, BLK
 
-mult_mod <- lm(total_stats_to_wins$wins ~ total_stats_to_wins[,7]
-               + total_stats_to_wins[,10]
+# mult_mod <- lm(total_stats_to_wins$wins ~ total_stats_to_wins[,7]
+#                + total_stats_to_wins[,10]
+#                + total_stats_to_wins[,13]
+#                + total_stats_to_wins[,20]
+#                + total_stats_to_wins[,25]
+#                + total_stats_to_wins[,18]
+#                + total_stats_to_wins[,22])
+
+mult_mod <- lm(total_stats_to_wins$wins ~ total_stats_to_wins[,10]
                + total_stats_to_wins[,13]
                + total_stats_to_wins[,20]
-               + total_stats_to_wins[,25]
                + total_stats_to_wins[,18]
                + total_stats_to_wins[,22])
+# names(lm$coefficients) <- c("(Intercept)", "x1")
 
 for (num_x_to_include in 1:24) {
-  
+  #lm()
 }
 summary(mult_mod)
 print(summary(mult_mod)$r.squared)
 print(summary(mult_mod)$adj.r.squared)
+
+# For the old mult_mod which considered the 10, 13, 20, 25, 18, 22
+# x variables in total_stats.csv, the r.squared was 0.4611394
+# and the 0.4542309
+
+# For the new mult_mod which considered the 10, 13, 20, 18, and 22
+# x variables in total_stats.csv, the r.squared was 0.4006081
+# and the 0.3951392
+
+
+
 ```
 Making the plot of team wins over total salary paid to players for that year. The
 salaries have been adjusted and any NULL wins have been removed.
