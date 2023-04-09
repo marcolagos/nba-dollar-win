@@ -100,6 +100,9 @@ total_salary_to_wins <- na.omit(total_salary_to_wins)
 
 ```
 ```{r}
+library(glmnet)
+set.seed(50)
+
 
 # Get rid of the asterisks in every Team Name in advanced_stats.csv
 advanced_stats <- read.csv("./data/advanced_stats.csv")
@@ -126,6 +129,7 @@ opponent_total_stats
 # empty values or no values (idk). Just do not use these three columns.
 
 
+# START OF ACTUALLY NEEDED CODE. THE CODE IN THIS BLOCK THAT IS ABOVE THIS LINE CAN BE DELETED.
 create_wins_long <- function(wins) {
   # NOTE THAT THIS FUNCTION USES nba_team_wins, I THINK IT SHOULD TECHNICALLY USE "wins"
   # which is more specific to what was actually passed into this function create_wins_long.
@@ -143,12 +147,14 @@ wins_long_res
 # Assume that every string in the "team" column of wins_long_inside
 # has already been trimmed and converted to lower case, BEFORE you pass it
 # into this function.
-create_advanced_stats_to_wins <- function(advanced_stats_inside, wins_long_inside) {
+create_df_stats_to_wins <- function(my_df_inside, wins_long_inside) {
 	
+  my_df_inside$team <- stringr::str_replace(my_df_inside$team, '\\*', '')
+  
   # All the team names in wins_long$team is already trimmed and converted to lower case.
   # Therefore we should trim and convert to lower case all the team names inside
   # advanced_stats_inside.
-	advanced_stats_inside$team <- str_to_lower(str_trim(advanced_stats_inside$team))
+	my_df_inside$team <- str_to_lower(str_trim(my_df_inside$team))
 	
 	# advanced_stats_bool_of_team_vec <- ifelse(wins_long_inside.contains(dvanced_stats_inside$team))
 	# advanced_stats_bool_of_year_vec <- ifelse(wins_long_inside.contains(dvanced_stats_inside$team))
@@ -174,26 +180,170 @@ create_advanced_stats_to_wins <- function(advanced_stats_inside, wins_long_insid
 	# that does NOT exist in both advanced_stats_inside and wins_long_inside.
 	
 	# left_join has a argument called "fill = list(wins = 0)"
-	merged_data <- left_join(advanced_stats_inside, wins_long_inside, by = c("year", "team"))
+	merged_data <- left_join(my_df_inside, wins_long_inside, by = c("year", "team"))
 	# names(merged_data) <- c("year", "team", "total_salary", "wins")
 	return(merged_data)
 }
 
-advanced_stats_to_wins <- create_advanced_stats_to_wins(advanced_stats, wins_long_res)
-advanced_stats_to_wins
+my_df <- advanced_stats
+# generate_plots_with_df <- function(my_df) {
+  # my_df should have a "team" column, a "year" column,
+  # and a bunch of columns which represent x variables.
+  # my_df should NOT already have a "wins" column.
+  
+  my_df$team <- stringr::str_replace(my_df$team, '\\*', '')
+  
+  my_df_to_wins <- create_df_stats_to_wins(my_df, wins_long_res)
+  
+  rsquared_vec <- c()
+  rsquared_adj_vec <- c()
 
-advanced_stats_to_wins <- na.omit(advanced_stats_to_wins)
-advanced_stats_to_wins
+  num_cols_in_df <- ncol(my_df_to_wins)  
+  col_inds_vec <- seq(from = 1, to = num_cols_in_df, by = 1)
+  
+  # We want to avoid comparing a given column to wins
+  # if that column contains String values (like the "team" column),
+  # or if that column is the Rank of the team, or if that column
+  # is the number of wins, or if that column is one of the x variables
+  # whose meaning is so close to winning games (for example, the percentage
+  # of 3-Point Goals or the number of goals), that we want to avoid it.
+  
+  # We can definitely include "ORtg"
+  col_names_to_avoid <- c("Rk", "team", "W","L", "PW", "PL", "MOV", "Arena", "wins", "SRS", "ORtg", "DRtg", "NRtg")
+  
+  # for (col_i in col_inds_vec) {
+  #   # Column Index 3 should be "Age"
+  #   # Column Index 29 should be "year"
+  #   cur_col_name <- colnames(total_with_opponent_total_stats_to_wins)[col_i]
+  #   
+  #   if (cur_col_name %in% col_names_to_avoid) {
+  #     next
+  #   }
+  #   
+  #   plot(my_df_to_wins[,col_i], my_df_to_wins$wins, xlab = cur_col_name, ylab = "wins")
+  #   
+  #   # Warning: NAs introduced by coercionWarning: no non-missing arguments to min; returning InfWarning: no non-missing arguments to max; returning -InfError in plot.window(...) : need finite 'xlim' values
+  #   
+  #   cur_mod <- lm(my_df_to_wins$wins ~ my_df_to_wins[,col_i])
+  #   # names(lm$coefficients) <- c("(Intercept)", "x1")
+  #   
+  #   # print("HI current col name is")
+  #   # print(colnames(my_df_to_wins)[col_i])
+  #   # # print(summary(cur_mod))
+  #   # print(summary(cur_mod)$r.squared)
+  #   # print(summary(cur_mod)$adj.r.squared)
+  #   
+  #   rsquared_vec <- append(rsquared_vec, summary(cur_mod)$r.squared)
+  #   rsquared_adj_vec <- append(rsquared_adj_vec, summary(cur_mod)$adj.r.squared)
+  # }
+  
+  # find_forward_selected_model(my_df_to_wins)
+  
+  # find_LASSO_selected_model(my_df_to_wins)
+  
+  my_df_to_wins <- na.omit(my_df_to_wins)
+  
+  my_df_just_x <- my_df_to_wins[!names(my_df) %in% col_names_to_avoid]
+  # message("MY_DF_JUST_X =========================")
+  # message(dim(my_df_just_x))
+  # message(typeof(my_df_just_x))
+  # 
+  # message(my_df_just_x[,1])
+  
+  print("MY_DF_JUST_X =========================")
+  print(dim(my_df_just_x))
+  print(typeof(my_df_just_x))
+  
+  print(my_df_just_x[,1])
+  
+  my_df_just_wins <- my_df_to_wins$wins
+  # message("MY_DF_JUST_WINS =========================")
+  # message(length(my_df_just_wins))
+  # message("Right before printing out my_df_just_wins")
+  # message(my_df_just_wins)
+  
+  print("MY_DF_JUST_WINS =========================")
+  print(length(my_df_just_wins))
+  print("Right before printing out my_df_just_wins")
+  print(my_df_just_wins)
+  
+  print(any(is.na(my_df_just_x)))
+  print(any(is.na(my_df_just_wins)))
+  
+  # my_df_just_x <- na.omit(my_df_just_x)
+  # my_df_just_wins <- na.omit(my_df_just_wins)
+  
+  class(my_df_just_x)
+  class(my_df_just_wins)
+  lasso_model <- glmnet(x = data.matrix(my_df_just_x), y = data.matrix(my_df_just_wins), alpha = 1)
+  # Call:  cv.glmnet(x = data.matrix(my_df_just_x), y = data.matrix(my_df_just_wins),      alpha = 1) 
+  # Measure: Mean-Squared Error 
+  # Lambda Index Measure      SE Nonzero
+  # min 0.3593    39  0.1315 0.00677       1
+  # 1se 0.3593    39  0.1315 0.00677       1
+  
+  
+  # alpha = 1 specifies Lasso regularization
+  # message("LASSO_MODEL =========================")
+  # message(dim(lasso_model))
+  # message(lasso_model)
+  print("LASSO_MODEL =========================")
+  print(dim(lasso_model))
+  print(lasso_model)
+  
+  # print(lasso_model$beta)
+  
+  length(lasso_model$beta)
+  print(dim(lasso_model$beta))
+  num_cols <- dim(lasso_model$beta)[2]
+  num_cols
+  # printSpMatrix(lasso_model$beta[, 1:num_cols], col.names=TRUE)
+  print(lasso_model$beta[,num_cols])
+  
+  
+#  return (3)
+#}
 
-# 616 by 27
-total_stats_to_wins <- create_advanced_stats_to_wins(total_stats, wins_long_res)
-total_stats_to_wins
+col_names_to_avoid <- c("Rk", "team", "wins", "Arena")
 
-# 554 by 27
-total_stats_to_wins <- na.omit(total_stats_to_wins)
-total_stats_to_wins
+adv_col_bool_vec <- names(advanced_stats) %in% col_names_to_avoid
+adv_col_bool_vec
+adv_col_bool_vec <- !names(advanced_stats) %in% col_names_to_avoid
+adv_col_bool_vec
+
+# hi <- generate_plots_with_df(advanced_stats)
+print("after generate_plots_with_df")
+
+
+
+
+
+
+# advanced_stats_to_wins <- create_advanced_stats_to_wins(advanced_stats, wins_long_res)
+# advanced_stats_to_wins
+# 
+# advanced_stats_to_wins <- na.omit(advanced_stats_to_wins)
+# advanced_stats_to_wins
+# 
+# # 616 by 27
+# total_stats_to_wins <- create_advanced_stats_to_wins(total_stats, wins_long_res)
+# total_stats_to_wins
+# 
+# # 554 by 27
+# total_stats_to_wins <- na.omit(total_stats_to_wins)
+# total_stats_to_wins
 
 ```
+```{r}
+
+# wins_long_res
+mod_just_intercept <- lm(wins_long_res$wins ~ 1)
+mod_just_intercept
+summary(mod_just_intercept)
+
+```
+
+
 ```{r}
 
 opponent_total_stats$team <- stringr::str_replace(opponent_total_stats$team, '\\*', '')
