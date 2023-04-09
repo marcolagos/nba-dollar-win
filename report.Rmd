@@ -1,0 +1,88 @@
+---
+title: "Report"
+author: "Zachary Katz"
+date: "2023-04-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(psych)
+library(ggplot2)
+library(reshape2)
+```
+Read in csv files:
+```{r}
+# Player, Year, Salary, Team
+nba_salaries <- read.csv("./data/nba_salaries.csv")
+# Team, Year, Wins
+nba_team_wins <- read.csv("./data/nba_team_wins.csv")
+# See Report advanced stats description
+advanced_stats <- read.csv("./data/advanced_stats.csv")
+# See Report shooting stats description
+shooting_stats <- read.csv("./data/shooting_stats.csv")
+# See Report shooting stats description
+opponent_shooting_stats <- read.csv("./data/opponent_shooting_stats.csv")
+# See Report total stats description
+total_stats <- read.csv("./data/total_stats.csv")
+# See Report total stats description
+opponent_total_stats <- read.csv("./data/opponent_total_stats.csv")
+
+# View(nba_salaries)
+# View(nba_team_wins)
+# View(advanced_stats)
+# View(shooting_stats)
+# View(opponent_shooting_stats)
+# View(total_stats)
+# View(opponent_total_stats)
+```
+Basic Summary
+```{r}
+print("==================================================")
+print("NBA Salaries CSV")
+# sapply(nba_salaries, summary)
+describe(nba_salaries)
+print("==================================================")
+print("NBA Team Wins CSV")
+# sapply(nba_team_wins, summary)
+describe(nba_team_wins)
+print("==================================================")
+print("NBA Advanced Stats CSV")
+# sapply(advanced_stats, summary)
+describe(advanced_stats)
+print("==================================================")
+print("NBA Shooting Stats CSV")
+# sapply(shooting_stats, summary)
+describe(shooting_stats)
+print("==================================================")
+print("NBA Opponent Shooting Stats CSV")
+# sapply(opponent_shooting_stats, summary)
+describe(opponent_shooting_stats)
+print("==================================================")
+print("NBA Total Stats CSV")
+# sapply(total_stats, summary)
+describe(total_stats)
+print("==================================================")
+print("NBA Opponent Total Stats CSV")
+# sapply(opponent_total_stats, summary)
+describe(opponent_total_stats)
+print("==================================================")
+```
+Basic Visualization
+```{r}
+# Create correlation matrix
+total_stats
+cor_mat <- cor(total_stats)
+
+# Melt correlation matrix into long format for ggplot2
+cor_melt <- melt(cor_mat)
+
+# Create ggplot2 plot of correlation matrix
+ggplot(cor_melt, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.title = element_blank()) +
+  labs(title = "Correlation Matrix of Total Statistics Variables")
+```
