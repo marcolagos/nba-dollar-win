@@ -62,7 +62,7 @@ analysis.
 adjust_salary_gdp_deflator <- function(base_year, nba_salaries, gdp_deflator) {
   base_year_gdp_value <- filter(gdp_deflator, year == base_year)$value
 
-  adjusted_salary <- c()
+  adjusted_salary <- c()s
   for (i in 1:nrow(nba_salaries)) {
   	current_year <- nba_salaries[i, 6]
 	current_year_gdp_value <- filter(gdp_deflator, year == current_year)$value
@@ -110,6 +110,7 @@ advanced_stats
 advanced_stats$team <- stringr::str_replace(advanced_stats$team, '\\*', '')
 advanced_stats
 
+total_stats
 total_stats$team <- stringr::str_replace(total_stats$team, '\\*', '')
 total_stats
 
@@ -140,9 +141,10 @@ create_wins_long <- function(wins) {
 	return(wins_long)
 }
 
+nba_team_wins
 # nba_team_wins
-wins_long_res <- create_wins_long(nba_team_wins)
-wins_long_res
+# wins_long_res <- create_wins_long(nba_team_wins)
+wins_long_res <- nba_team_wins
 
 # Assume that every string in the "team" column of wins_long_inside
 # has already been trimmed and converted to lower case, BEFORE you pass it
@@ -185,8 +187,8 @@ create_df_stats_to_wins <- function(my_df_inside, wins_long_inside) {
 	return(merged_data)
 }
 
-my_df <- advanced_stats
-# generate_plots_with_df <- function(my_df) {
+# my_df <- advanced_stats
+generate_plots_with_df <- function(my_df) {
   # my_df should have a "team" column, a "year" column,
   # and a bunch of columns which represent x variables.
   # my_df should NOT already have a "wins" column.
@@ -194,6 +196,7 @@ my_df <- advanced_stats
   my_df$team <- stringr::str_replace(my_df$team, '\\*', '')
   
   my_df_to_wins <- create_df_stats_to_wins(my_df, wins_long_res)
+  my_df_to_wins <- na.omit(my_df_to_wins)
   
   rsquared_vec <- c()
   rsquared_adj_vec <- c()
@@ -241,9 +244,9 @@ my_df <- advanced_stats
   
   # find_LASSO_selected_model(my_df_to_wins)
   
-  my_df_to_wins <- na.omit(my_df_to_wins)
+  # my_df_to_wins <- na.omit(my_df_to_wins)
   
-  my_df_just_x <- my_df_to_wins[!names(my_df) %in% col_names_to_avoid]
+  my_df_just_x <- my_df_to_wins[!names(my_df_to_wins) %in% col_names_to_avoid]
   # message("MY_DF_JUST_X =========================")
   # message(dim(my_df_just_x))
   # message(typeof(my_df_just_x))
@@ -273,8 +276,10 @@ my_df <- advanced_stats
   # my_df_just_x <- na.omit(my_df_just_x)
   # my_df_just_wins <- na.omit(my_df_just_wins)
   
-  class(my_df_just_x)
-  class(my_df_just_wins)
+  print(class(my_df_just_x))
+  print(class(my_df_just_wins))
+  
+  print(colnames(my_df_just_x))
   lasso_model <- glmnet(x = data.matrix(my_df_just_x), y = data.matrix(my_df_just_wins), alpha = 1)
   # Call:  cv.glmnet(x = data.matrix(my_df_just_x), y = data.matrix(my_df_just_wins),      alpha = 1) 
   # Measure: Mean-Squared Error 
@@ -289,6 +294,7 @@ my_df <- advanced_stats
   # message(lasso_model)
   print("LASSO_MODEL =========================")
   print(dim(lasso_model))
+  print(class(lasso_model))
   print(lasso_model)
   
   # print(lasso_model$beta)
@@ -298,11 +304,31 @@ my_df <- advanced_stats
   num_cols <- dim(lasso_model$beta)[2]
   num_cols
   # printSpMatrix(lasso_model$beta[, 1:num_cols], col.names=TRUE)
+  print(typeof(lasso_model$beta[,num_cols]))
   print(lasso_model$beta[,num_cols])
   
+  print("RIGHT BEFORE include_vars_vec")
+  include_vars_vec <- ifelse(lasso_model$beta[,num_cols] > 0.00001 | lasso_model$beta[,num_cols] < -0.00001, 1, 0)
+  print("RIGHT AFTER include_vars_vec")
+  print(include_vars_vec)
+  print(is.data.frame(include_vars_vec))
+  print(matrix(include_vars_vec))
+  print(dim(include_vars_vec))
+  #print(include_vars_vec[,1])
+  #print(include_vars_vec[1,])
   
-#  return (3)
-#}
+  #lasso_model_nonzero_coeffs <- lasso_model$beta[,num_cols][,include_vars_vec[2,]]
+  #print("RIGHT BEFORE printing lasso_model_nonzero_coeffs ")
+  #print(lasso_model_nonzero_coeffs)
+  
+  
+  print(typeof(coef(lasso_model)))
+  print(coef(lasso_model))
+  
+  # print(lasso_model$beta[,num_cols][])
+  
+  return (lasso_model)
+}
 
 col_names_to_avoid <- c("Rk", "team", "wins", "Arena")
 
@@ -311,8 +337,13 @@ adv_col_bool_vec
 adv_col_bool_vec <- !names(advanced_stats) %in% col_names_to_avoid
 adv_col_bool_vec
 
-# hi <- generate_plots_with_df(advanced_stats)
-print("after generate_plots_with_df")
+lasso_model_advanced <- generate_plots_with_df(advanced_stats)
+print("after generate_plots_with_df(advanced_stats)")
+
+# opponent_total_stats$team <- stringr::str_replace(opponent_total_stats$team, '\\*', '')
+# total_with_opponent_total_stats <- left_join(total_stats, opponent_total_stats, by = c("year", "team"))
+# total_with_opponent_total_stats
+# res2 <- generate_plots_with_df(total_with_opponent_total_stats)
 
 
 
@@ -334,6 +365,87 @@ print("after generate_plots_with_df")
 # total_stats_to_wins
 
 ```
+```{r}
+# PURPOSE OF THIS BLOCK OF CODE IS TO GENERATE A 20 ROWS BY 30 COLUMNS (30 IS THE NUMBER OF COLUMNS IN ADVANCED_DATA CSV)
+# WHERE EACH ROW IS ONE OF THE YEARS FOR THE HOUSTON ROCKETS TEAM.
+
+# THE FUNCTION get_rows_for_one_team ASSUMES THAT THE DATAFRAME my_df HAS A teams
+# column whose name is lowercase "teams"
+get_rows_for_one_team <- function(my_df, cur_team_str) {
+  my_df$team <- stringr::str_replace(my_df$team, '\\*', '')
+  my_df$team <- str_to_lower(str_trim(my_df$team))
+  
+  ret_df <- my_df[my_df$team == cur_team_str,]
+  
+  return (ret_df)
+}
+
+advanced_stats_to_wins <- create_df_stats_to_wins(advanced_stats, wins_long_res)
+advanced_stats_to_wins <- na.omit(advanced_stats_to_wins)
+
+advanced_stats_just_houston <- get_rows_for_one_team(advanced_stats_to_wins, "houston rockets")
+advanced_stats_just_houston
+# Year goes from 2000 to 2019 (so 20 total years)
+
+
+
+
+```
+
+```{r}
+
+col_names_to_avoid <- c("Rk", "team", "W","L", "PW", "PL", "MOV", "Arena", "wins", "SRS", "ORtg", "DRtg", "NRtg")
+advanced_stats_just_houston_x <- advanced_stats_just_houston[!names(advanced_stats_just_houston) %in% col_names_to_avoid]
+advanced_stats_just_houston_x
+
+num_rows <- length(lasso_model_advanced$lambda)
+num_rows
+best_lambda_value <- lasso_model_advanced$lambda[num_rows]
+best_lambda_value
+results <- predict(lasso_model_advanced, newx=data.matrix(advanced_stats_just_houston_x), s=best_lambda_value, type="response")
+results
+
+plot(advanced_stats_just_houston$year, results, col = "red", xlab = "Year", ylab = "Wins for Houston Rockets in year")
+points(advanced_stats_just_houston$year, advanced_stats_just_houston$wins, col = "grey")
+legend("bottomright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
+
+```
+```{r}
+advanced_2021_stats <- read.csv("./data/2021_advanced.csv")
+# cols_to_remove <- names(advanced_2021_stats)[grepl("^unnamed", names(data))]
+# cols_to_remove
+# advanced_2021_stats <- advanced_2021_stats[, !names(advanced_2021_stats) %in% cols_to_remove]
+
+advanced_2021_stats <- advanced_2021_stats[-28]
+advanced_2021_stats <- advanced_2021_stats[-23]
+advanced_2021_stats <- advanced_2021_stats[-18]
+
+advanced_2021_stats$year <- 2021
+
+col_names_to_avoid <- c("Rk", "team", "W", "L", "PW", "PL", "MOV", "Arena", "wins", "SRS", "ORtg", "DRtg", "NRtg")
+advanced_2021_stats_x <- advanced_2021_stats[!names(advanced_2021_stats) %in% col_names_to_avoid]
+advanced_2021_stats_x
+
+num_rows <- length(lasso_model_advanced$lambda)
+num_rows
+best_lambda_value <- lasso_model_advanced$lambda[num_rows]
+best_lambda_value
+results <- predict(lasso_model_advanced, newx=data.matrix(advanced_2021_stats_x), s=best_lambda_value, type="response")
+results
+
+team_inds <- seq(from=1, to=length(advanced_2021_stats$team), by=1)
+# plot(factor(advanced_2021_stats$team), results, col = "red", xlab = "Team", ylab = "Wins for Teams in 2021")
+plot(team_inds, results, col = "red", xlab = "Team", ylab = "Wins for Teams in 2021")
+text(seq_along(advanced_2021_stats$team), rep(0.5, length(advanced_2021_stats$team)), labels = advanced_2021_stats$team, srt = 90, adj = c(0, 0.5), xpd = TRUE, cex = 0.4)
+points(team_inds, advanced_2021_stats$W, col = "grey")
+legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
+
+#points(advanced_2021_stats$team, advanced_2021_stats$W, col = "grey")
+#legend("bottomright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
+
+
+```
+
 ```{r}
 
 # wins_long_res
