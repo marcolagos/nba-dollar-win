@@ -1,4 +1,4 @@
----
+a---
 title: "general_before_main"
 author: "Zachary Katz"
 date: "2023-04-08"
@@ -15,13 +15,13 @@ nba_team_wins <- read.csv("./data/nba_team_wins.csv")
 
 advanced_stats <- read.csv("./data/advanced_stats.csv")
 
-shooting_stats <- read.csv("./data/shooting_team.csv")
-opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
+shooting_stats <- read.csv("./data/shooting_stats.csv")
+opponent_shooting_stats <- read.csv("./data/opponent_shooting_stats.csv")
 
-total_stats <- read.csv("./data/total_team.csv")
-opponent_total_stats <- read.csv("./data/total_opponent.csv")
+total_stats <- read.csv("./data/total_stats.csv")
+opponent_total_stats <- read.csv("./data/opponent_total_stats.csv")
 
-gdp_deflator <- read.csv("./data/gdp_deflator_by_year.csv")
+gdp_deflator <- read.csv("./data/gdp_by_year.csv")
 
 # View(nba_salaries)
 # View(nba_team_wins)

@@ -30,6 +30,31 @@ Plotting wins over field goal attempts, FG%, 3PTs made, 3PTs attempted, 2PTs
 made, 2PTs attempted.
 ```{r}
 total_stats_to_wins <- create_stat_to_wins(total_stats)
-total_stats_to_wins
+
+plot_total_stats_to_wins <- function(data) {
+	col_inds_vec <- seq(from = 5, to = 13, by = 1)
+	names <- c("Field Goals", "Field Goal Attempts", "Field Goal %", "3PT FGs", "3PT FG Attempts", "3PT %", "2PT FGs", "2PT FG Attempts", "2PT %")
+	for (col_i in col_inds_vec) {
+	  plot(data[,col_i], data$wins, xlab = names[col_i - 5], ylab = "wins")
+	}
+}
+
+plot_total_stats_to_wins(total_stats_to_wins)
+```
+Plotting wins over FG statistics for each year separately
+```{r}
+years <- seq(from=2000, to=2019, by=1)
+
+col_inds_vec <- seq(from = 5, to = 5, by = 1)
+
+# for(year_i in years) {
+#       total_stats_to_wins_year <- filter(total_stats_to_wins, year == year_i)
+# 	  model <- lm(total_stats_to_wins_year$wins ~ total_stats_to_wins_year[,9])
+# 	  beta1_by_year <- append(beta1_by_year, model$coefficients[2])
+# }
+plot(total_stats_to_wins$year, total_stats_to_wins$X3PA, xlim = c(1999, 2020))
+pa3_model <- lm(total_stats_to_wins$X3PA ~ total_stats_to_wins$year)
+
+abline()
 ```
 
