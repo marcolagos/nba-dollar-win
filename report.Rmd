@@ -10,11 +10,18 @@ knitr::opts_chunk$set(echo = TRUE)
 library(psych)
 library(ggplot2)
 library(reshape2)
+library(GGally)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(scales)
 ```
 Read in csv files:
 ```{r}
 # Player, Year, Salary, Team
-nba_salaries <- read.csv("./data/nba_salaries.csv")
+adjusted_nba_salaries <- read.csv("./data/adjusted_nba_salaries.csv")
+# Team, Year, Total Salary
+total_salary_by_team <- read.csv("./data/total_salary_by_team.csv")
 # Team, Year, Wins
 nba_team_wins <- read.csv("./data/nba_team_wins.csv")
 # See Report advanced stats description
@@ -41,7 +48,11 @@ Basic Summary
 print("==================================================")
 print("NBA Salaries CSV")
 # sapply(nba_salaries, summary)
-describe(nba_salaries)
+describe(adjusted_nba_salaries)
+print("==================================================")
+print("NBA Total Salaries CSV")
+# sapply(nba_salaries, summary)
+describe(total_salary_by_team)
 print("==================================================")
 print("NBA Team Wins CSV")
 # sapply(nba_team_wins, summary)
@@ -68,21 +79,144 @@ print("NBA Opponent Total Stats CSV")
 describe(opponent_total_stats)
 print("==================================================")
 ```
-Basic Visualization
+Basic Visualization (Correlation Matrices)
 ```{r}
-# Create correlation matrix
-total_stats
-cor_mat <- cor(total_stats)
+# =========================================================
+#				Correlation Matrices
+# =========================================================
+create_correlation_matrix <- function(data, name) {
+	# Create correlation matrix
+	numeric_data <- data[, sapply(data, is.numeric)]
+	
+	# Remove rows with missing values
+	numeric_data <- numeric_data[complete.cases(numeric_data),]
 
-# Melt correlation matrix into long format for ggplot2
-cor_melt <- melt(cor_mat)
+	cor_mat <- cor(numeric_data)
+	
+	# Melt correlation matrix into long format for ggplot2
+	cor_melt <- melt(cor_mat)
+	
+	# Create ggplot2 plot of correlation matrix
+	ggplot(cor_melt, aes(x = Var1, y = Var2, fill = value)) +
+	  geom_tile() +
+	  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+	  theme_minimal() +
+	  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+	        legend.title = element_blank()) +
+	  labs(title = name)
+}
 
-# Create ggplot2 plot of correlation matrix
-ggplot(cor_melt, aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile() +
-  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+create_correlation_matrix(total_stats, "Correlation Matrix of Total Statistics Variables")
+create_correlation_matrix(opponent_total_stats, "Correlation Matrix of Opponent Total Statistics Variables")
+create_correlation_matrix(advanced_stats, "Correlation Matrix of Advanced Statistics Variables")
+create_correlation_matrix(shooting_stats, "Correlation Matrix of Shooting Statistics Variables")
+create_correlation_matrix(opponent_shooting_stats, "Correlation Matrix of Opponent Shooting Statistics Variables")
+```
+Basic Visualization (Scatterplot Matrices)
+```{r}
+# =========================================================
+#				ScatterPlot Matrices
+# =========================================================
+create_stat_to_wins <- function(stat) {
+	stat$year <- as.integer(stat$year)
+	merged_data <- left_join(stat, nba_team_wins, by = c("year", "team"))
+	merged_data <- na.omit(merged_data)
+	return(merged_data)
+}
+
+total_stats_wins <- create_stat_to_wins(total_stats)
+
+# Relationship between wins and field goal attempts
+ggpairs(total_stats_wins[,c("wins", "PTS", "FGA", "X3PA", "X2PA", "FTA")], title = "Scatterplot Matrix for Team Wins, Points Scored, and Shooting Percentages")
+# Relationship between wins and field goal percentage
+ggpairs(total_stats_wins[,c("wins", "PTS", "FGA", "X3P.", "X2P.", "FT.")], title = "Scatterplot Matrix for Team Wins, Points Scored, and Shooting Percentages")
+# Relationship between wins and rebounds (*total rebounds*)
+ggpairs(total_stats_wins[,c("wins", "PTS", "ORB", "DRB", "TRB")], title = "Scatterplot Matrix for Team Wins, Points Scored, and Shooting Percentages")
+# Relationship between wins and assists, blocks, turnovers, personal fouls
+ggpairs(total_stats_wins[,c("wins", "PTS", "AST", "BLK", "TOV", "PF")], title = "Scatterplot Matrix for Team Wins, Points Scored, and Shooting Percentages")
+```
+Basic Visualization (Boxplots)
+```{r}
+# =========================================================
+#				Bubble Charts
+# =========================================================
+nba_total_salary_to_wins <- create_stat_to_wins(total_salary_by_team)
+
+salary_wins_advanced <- left_join(advanced_stats, nba_total_salary_to_wins, by = c("year", "team"))
+salary_wins_advanced <- na.omit(salary_wins_advanced)
+
+salary_wins_advanced_total <- left_join(total_stats, nba_total_salary_to_wins, by = c("year", "team"))
+salary_wins_advanced_total <- na.omit(salary_wins_advanced_total)
+
+bubble_data <- data.frame(
+  team_wins = salary_wins_advanced_total$wins,
+  salary = salary_wins_advanced_total$total_salary,
+  total_rebounds = salary_wins_advanced_total$TRB
+)
+ggplot(bubble_data, aes(x = salary, y = total_rebounds, size = team_wins, color = total_rebounds)) +
+  geom_point() +
+  scale_size_continuous(range = c(2, 10)) +
+  labs(x = "Salary", y = "Total Rebounds", size = "Team Wins") + scale_color_gradient(low = "blue", high = "red")
+```
+Basic Visualization (Stacked Bar Plot)
+```{r}
+# =========================================================
+#				Stacked Bar Plot
+# =========================================================
+# Create a subset of total_stats dataframe for selected variables
+team_stats <- total_stats[, c("team", "PTS", "AST", "TRB", "TOV")]
+
+# Calculate the total of each variable by team
+team_stats_summary <- aggregate(. ~ team, data = team_stats, FUN = sum)
+
+# Convert data from wide to long format
+team_stats_long <- gather(team_stats_summary, key = "stat", value = "total", -team)
+
+# Create the stacked bar chart
+ggplot(team_stats_long, aes(x = team, y = total, fill = stat)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Composition of Total Team Statistics") +
+  xlab("Team") +
+  ylab("Total") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.title = element_blank()) +
-  labs(title = "Correlation Matrix of Total Statistics Variables")
+  theme(legend.position = "bottom")
+```
+Basic Analysis (Principal Component Analysis)
+```{r}
+nba_total_to_wins <- create_stat_to_wins(total_stats)
+
+# Remove non-numeric columns
+numeric_data <- nba_total_to_wins[, sapply(nba_total_to_wins, is.numeric)]
+
+# Remove rows with missing values
+numeric_data <- na.omit(numeric_data)
+
+scaled_data <- scale(numeric_data)
+pca <- prcomp(scaled_data, center = TRUE, scale. = TRUE)
+
+# Extract the first two principal components
+pca_data <- data.frame(pca$x[,1:2])
+
+# Extract the loadings
+loadings <- data.frame(pca$rotation[,1:2])
+
+# Perform PCA on numeric data
+pca <- prcomp(numeric_data, center = TRUE, scale. = TRUE)
+
+# Extract the first two principal components and create a data frame
+pca_data <- data.frame(pca$x[, 1:2], team = nba_total_to_wins$team)
+
+# Extract the loadings and create a data frame
+loadings <- data.frame(variable = colnames(numeric_data), 
+                       PC1 = pca$rotation[, 1], 
+                       PC2 = pca$rotation[, 2])
+
+# Plot the loadings on the first two principal components
+ggplot(pca_data, aes(x = PC1, y = PC2)) + 
+  geom_point(aes(color = team)) + 
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  geom_vline(xintercept = 0, linetype = "dashed") + 
+  geom_text(data = loadings, aes(x = PC1, y = PC2, label = variable), size = 3) +
+  ggtitle("PCA: Loadings Plot")
+
 ```
