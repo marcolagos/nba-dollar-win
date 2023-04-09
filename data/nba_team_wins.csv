@@ -1,21 +1,601 @@
-year,Atlanta Hawks,Boston Celtics,Brooklyn Nets,Chicago Bulls,Charlotte Hornets,Cleveland Cavaliers,Dallas Mavericks,Denver Nuggets,Detroit Pistons,Golden State Warriors,Houston Rockets,Indiana Pacers,Los Angeles Clippers,Los Angeles Lakers,Memphis Grizzlies,Miami Heat,Milwaukee Bucks,Minnesota Timberwolves,New Orleans Pelicans,New York Knicks,Oklahoma City Thunder,Orlando Magic,Philadelphia 76ers,Phoenix Suns,Portland Trail Blazers,Sacramento Kings,San Antonio Spurs,Toronto Raptors,Utah Jazz,Washington Wizards
-2019,20,48,35,22,23,19,43,46,20,15,44,45,49,52,34,44,56,19,30,21,44,33,43,34,35,31,32,53,44,25
-2018,29,49,42,22,39,19,33,54,41,57,53,48,48,37,33,39,60,36,33,17,49,42,51,19,53,39,48,58,50,32
-2017,24,55,28,27,36,50,24,46,39,58,65,48,42,35,22,44,44,47,48,29,48,25,52,21,49,27,47,59,48,43
-2016,43,53,20,41,36,51,33,40,37,67,55,42,51,26,43,41,42,31,34,31,47,29,28,24,41,32,61,51,51,49
-2015,48,48,21,42,48,57,42,33,44,73,41,45,53,17,42,48,33,29,30,32,55,35,10,23,44,33,67,56,40,41
-2014,60,40,38,50,33,53,50,30,32,67,56,38,56,21,55,37,41,16,45,17,45,25,18,39,51,29,55,49,38,46
-2013,38,25,44,48,43,33,49,36,29,51,54,56,57,27,50,54,15,40,34,37,59,23,19,48,54,28,62,48,25,44
-2012,44,41,49,45,21,24,41,57,29,47,45,49,56,45,56,66,38,31,27,54,60,20,34,25,33,28,58,34,43,29
-2011,40,39,22,50,7,21,36,38,25,23,34,42,40,41,41,46,31,26,21,36,47,37,35,33,28,22,50,23,36,20
-2010,44,56,24,62,34,19,57,50,30,36,43,37,32,57,46,58,35,17,46,42,55,52,41,40,48,24,61,22,39,23
-2009,53,50,12,41,44,61,55,53,27,26,42,32,29,57,40,47,46,15,37,29,50,59,27,54,50,25,50,40,53,26
-2008,47,62,34,41,35,66,50,54,39,29,53,36,19,65,24,43,34,24,49,32,23,59,41,46,54,17,54,33,48,19
-2007,37,66,34,33,32,45,51,50,59,48,55,36,23,57,22,15,26,22,56,23,20,52,40,55,41,38,56,41,54,43
-2006,30,24,41,49,33,50,67,45,53,42,52,35,40,42,22,44,28,32,39,33,31,40,35,61,32,33,58,47,51,41
-2005,26,33,49,41,26,50,60,44,64,34,34,41,47,45,49,52,40,33,38,23,35,36,38,54,21,44,63,27,41,42
-2004,13,45,42,47,18,42,58,49,54,34,51,44,37,34,45,59,30,44,18,33,52,36,43,62,27,50,59,33,26,45
-2003,28,36,47,23,,35,52,43,54,37,45,61,28,56,50,42,41,58,41,39,37,21,33,29,41,55,57,33,42,25
-2002,35,44,49,30,,17,60,17,50,38,43,48,27,50,28,25,42,51,47,37,40,42,48,44,50,59,60,24,47,37
-2001,33,49,52,21,44,29,57,27,50,21,28,42,39,58,23,36,41,50,,30,45,44,43,36,49,61,58,42,44,37
-2000,25,36,26,15,46,30,53,40,32,17,45,41,31,56,23,50,52,47,,48,44,43,56,51,50,55,58,47,53,19
+year,team,wins
+2019,atlanta hawks,20
+2019,boston celtics,48
+2019,brooklyn nets,35
+2019,chicago bulls,22
+2019,charlotte hornets,23
+2019,cleveland cavaliers,19
+2019,dallas mavericks,43
+2019,denver nuggets,46
+2019,detroit pistons,20
+2019,golden state warriors,15
+2019,houston rockets,44
+2019,indiana pacers,45
+2019,los angeles clippers,49
+2019,los angeles lakers,52
+2019,memphis grizzlies,34
+2019,miami heat,44
+2019,milwaukee bucks,56
+2019,minnesota timberwolves,19
+2019,new orleans pelicans,30
+2019,new york knicks,21
+2019,oklahoma city thunder,44
+2019,orlando magic,33
+2019,philadelphia 76ers,43
+2019,phoenix suns,34
+2019,portland trail blazers,35
+2019,sacramento kings,31
+2019,san antonio spurs,32
+2019,toronto raptors,53
+2019,utah jazz,44
+2019,washington wizards,25
+2018,atlanta hawks,29
+2018,boston celtics,49
+2018,brooklyn nets,42
+2018,chicago bulls,22
+2018,charlotte hornets,39
+2018,cleveland cavaliers,19
+2018,dallas mavericks,33
+2018,denver nuggets,54
+2018,detroit pistons,41
+2018,golden state warriors,57
+2018,houston rockets,53
+2018,indiana pacers,48
+2018,los angeles clippers,48
+2018,los angeles lakers,37
+2018,memphis grizzlies,33
+2018,miami heat,39
+2018,milwaukee bucks,60
+2018,minnesota timberwolves,36
+2018,new orleans pelicans,33
+2018,new york knicks,17
+2018,oklahoma city thunder,49
+2018,orlando magic,42
+2018,philadelphia 76ers,51
+2018,phoenix suns,19
+2018,portland trail blazers,53
+2018,sacramento kings,39
+2018,san antonio spurs,48
+2018,toronto raptors,58
+2018,utah jazz,50
+2018,washington wizards,32
+2017,atlanta hawks,24
+2017,boston celtics,55
+2017,brooklyn nets,28
+2017,chicago bulls,27
+2017,charlotte hornets,36
+2017,cleveland cavaliers,50
+2017,dallas mavericks,24
+2017,denver nuggets,46
+2017,detroit pistons,39
+2017,golden state warriors,58
+2017,houston rockets,65
+2017,indiana pacers,48
+2017,los angeles clippers,42
+2017,los angeles lakers,35
+2017,memphis grizzlies,22
+2017,miami heat,44
+2017,milwaukee bucks,44
+2017,minnesota timberwolves,47
+2017,new orleans pelicans,48
+2017,new york knicks,29
+2017,oklahoma city thunder,48
+2017,orlando magic,25
+2017,philadelphia 76ers,52
+2017,phoenix suns,21
+2017,portland trail blazers,49
+2017,sacramento kings,27
+2017,san antonio spurs,47
+2017,toronto raptors,59
+2017,utah jazz,48
+2017,washington wizards,43
+2016,atlanta hawks,43
+2016,boston celtics,53
+2016,brooklyn nets,20
+2016,chicago bulls,41
+2016,charlotte hornets,36
+2016,cleveland cavaliers,51
+2016,dallas mavericks,33
+2016,denver nuggets,40
+2016,detroit pistons,37
+2016,golden state warriors,67
+2016,houston rockets,55
+2016,indiana pacers,42
+2016,los angeles clippers,51
+2016,los angeles lakers,26
+2016,memphis grizzlies,43
+2016,miami heat,41
+2016,milwaukee bucks,42
+2016,minnesota timberwolves,31
+2016,new orleans pelicans,34
+2016,new york knicks,31
+2016,oklahoma city thunder,47
+2016,orlando magic,29
+2016,philadelphia 76ers,28
+2016,phoenix suns,24
+2016,portland trail blazers,41
+2016,sacramento kings,32
+2016,san antonio spurs,61
+2016,toronto raptors,51
+2016,utah jazz,51
+2016,washington wizards,49
+2015,atlanta hawks,48
+2015,boston celtics,48
+2015,brooklyn nets,21
+2015,chicago bulls,42
+2015,charlotte hornets,48
+2015,cleveland cavaliers,57
+2015,dallas mavericks,42
+2015,denver nuggets,33
+2015,detroit pistons,44
+2015,golden state warriors,73
+2015,houston rockets,41
+2015,indiana pacers,45
+2015,los angeles clippers,53
+2015,los angeles lakers,17
+2015,memphis grizzlies,42
+2015,miami heat,48
+2015,milwaukee bucks,33
+2015,minnesota timberwolves,29
+2015,new orleans pelicans,30
+2015,new york knicks,32
+2015,oklahoma city thunder,55
+2015,orlando magic,35
+2015,philadelphia 76ers,10
+2015,phoenix suns,23
+2015,portland trail blazers,44
+2015,sacramento kings,33
+2015,san antonio spurs,67
+2015,toronto raptors,56
+2015,utah jazz,40
+2015,washington wizards,41
+2014,atlanta hawks,60
+2014,boston celtics,40
+2014,brooklyn nets,38
+2014,chicago bulls,50
+2014,charlotte hornets,33
+2014,cleveland cavaliers,53
+2014,dallas mavericks,50
+2014,denver nuggets,30
+2014,detroit pistons,32
+2014,golden state warriors,67
+2014,houston rockets,56
+2014,indiana pacers,38
+2014,los angeles clippers,56
+2014,los angeles lakers,21
+2014,memphis grizzlies,55
+2014,miami heat,37
+2014,milwaukee bucks,41
+2014,minnesota timberwolves,16
+2014,new orleans pelicans,45
+2014,new york knicks,17
+2014,oklahoma city thunder,45
+2014,orlando magic,25
+2014,philadelphia 76ers,18
+2014,phoenix suns,39
+2014,portland trail blazers,51
+2014,sacramento kings,29
+2014,san antonio spurs,55
+2014,toronto raptors,49
+2014,utah jazz,38
+2014,washington wizards,46
+2013,atlanta hawks,38
+2013,boston celtics,25
+2013,brooklyn nets,44
+2013,chicago bulls,48
+2013,charlotte hornets,43
+2013,cleveland cavaliers,33
+2013,dallas mavericks,49
+2013,denver nuggets,36
+2013,detroit pistons,29
+2013,golden state warriors,51
+2013,houston rockets,54
+2013,indiana pacers,56
+2013,los angeles clippers,57
+2013,los angeles lakers,27
+2013,memphis grizzlies,50
+2013,miami heat,54
+2013,milwaukee bucks,15
+2013,minnesota timberwolves,40
+2013,new orleans pelicans,34
+2013,new york knicks,37
+2013,oklahoma city thunder,59
+2013,orlando magic,23
+2013,philadelphia 76ers,19
+2013,phoenix suns,48
+2013,portland trail blazers,54
+2013,sacramento kings,28
+2013,san antonio spurs,62
+2013,toronto raptors,48
+2013,utah jazz,25
+2013,washington wizards,44
+2012,atlanta hawks,44
+2012,boston celtics,41
+2012,brooklyn nets,49
+2012,chicago bulls,45
+2012,charlotte hornets,21
+2012,cleveland cavaliers,24
+2012,dallas mavericks,41
+2012,denver nuggets,57
+2012,detroit pistons,29
+2012,golden state warriors,47
+2012,houston rockets,45
+2012,indiana pacers,49
+2012,los angeles clippers,56
+2012,los angeles lakers,45
+2012,memphis grizzlies,56
+2012,miami heat,66
+2012,milwaukee bucks,38
+2012,minnesota timberwolves,31
+2012,new orleans pelicans,27
+2012,new york knicks,54
+2012,oklahoma city thunder,60
+2012,orlando magic,20
+2012,philadelphia 76ers,34
+2012,phoenix suns,25
+2012,portland trail blazers,33
+2012,sacramento kings,28
+2012,san antonio spurs,58
+2012,toronto raptors,34
+2012,utah jazz,43
+2012,washington wizards,29
+2011,atlanta hawks,40
+2011,boston celtics,39
+2011,brooklyn nets,22
+2011,chicago bulls,50
+2011,charlotte hornets,7
+2011,cleveland cavaliers,21
+2011,dallas mavericks,36
+2011,denver nuggets,38
+2011,detroit pistons,25
+2011,golden state warriors,23
+2011,houston rockets,34
+2011,indiana pacers,42
+2011,los angeles clippers,40
+2011,los angeles lakers,41
+2011,memphis grizzlies,41
+2011,miami heat,46
+2011,milwaukee bucks,31
+2011,minnesota timberwolves,26
+2011,new orleans pelicans,21
+2011,new york knicks,36
+2011,oklahoma city thunder,47
+2011,orlando magic,37
+2011,philadelphia 76ers,35
+2011,phoenix suns,33
+2011,portland trail blazers,28
+2011,sacramento kings,22
+2011,san antonio spurs,50
+2011,toronto raptors,23
+2011,utah jazz,36
+2011,washington wizards,20
+2010,atlanta hawks,44
+2010,boston celtics,56
+2010,brooklyn nets,24
+2010,chicago bulls,62
+2010,charlotte hornets,34
+2010,cleveland cavaliers,19
+2010,dallas mavericks,57
+2010,denver nuggets,50
+2010,detroit pistons,30
+2010,golden state warriors,36
+2010,houston rockets,43
+2010,indiana pacers,37
+2010,los angeles clippers,32
+2010,los angeles lakers,57
+2010,memphis grizzlies,46
+2010,miami heat,58
+2010,milwaukee bucks,35
+2010,minnesota timberwolves,17
+2010,new orleans pelicans,46
+2010,new york knicks,42
+2010,oklahoma city thunder,55
+2010,orlando magic,52
+2010,philadelphia 76ers,41
+2010,phoenix suns,40
+2010,portland trail blazers,48
+2010,sacramento kings,24
+2010,san antonio spurs,61
+2010,toronto raptors,22
+2010,utah jazz,39
+2010,washington wizards,23
+2009,atlanta hawks,53
+2009,boston celtics,50
+2009,brooklyn nets,12
+2009,chicago bulls,41
+2009,charlotte hornets,44
+2009,cleveland cavaliers,61
+2009,dallas mavericks,55
+2009,denver nuggets,53
+2009,detroit pistons,27
+2009,golden state warriors,26
+2009,houston rockets,42
+2009,indiana pacers,32
+2009,los angeles clippers,29
+2009,los angeles lakers,57
+2009,memphis grizzlies,40
+2009,miami heat,47
+2009,milwaukee bucks,46
+2009,minnesota timberwolves,15
+2009,new orleans pelicans,37
+2009,new york knicks,29
+2009,oklahoma city thunder,50
+2009,orlando magic,59
+2009,philadelphia 76ers,27
+2009,phoenix suns,54
+2009,portland trail blazers,50
+2009,sacramento kings,25
+2009,san antonio spurs,50
+2009,toronto raptors,40
+2009,utah jazz,53
+2009,washington wizards,26
+2008,atlanta hawks,47
+2008,boston celtics,62
+2008,brooklyn nets,34
+2008,chicago bulls,41
+2008,charlotte hornets,35
+2008,cleveland cavaliers,66
+2008,dallas mavericks,50
+2008,denver nuggets,54
+2008,detroit pistons,39
+2008,golden state warriors,29
+2008,houston rockets,53
+2008,indiana pacers,36
+2008,los angeles clippers,19
+2008,los angeles lakers,65
+2008,memphis grizzlies,24
+2008,miami heat,43
+2008,milwaukee bucks,34
+2008,minnesota timberwolves,24
+2008,new orleans pelicans,49
+2008,new york knicks,32
+2008,oklahoma city thunder,23
+2008,orlando magic,59
+2008,philadelphia 76ers,41
+2008,phoenix suns,46
+2008,portland trail blazers,54
+2008,sacramento kings,17
+2008,san antonio spurs,54
+2008,toronto raptors,33
+2008,utah jazz,48
+2008,washington wizards,19
+2007,atlanta hawks,37
+2007,boston celtics,66
+2007,brooklyn nets,34
+2007,chicago bulls,33
+2007,charlotte hornets,32
+2007,cleveland cavaliers,45
+2007,dallas mavericks,51
+2007,denver nuggets,50
+2007,detroit pistons,59
+2007,golden state warriors,48
+2007,houston rockets,55
+2007,indiana pacers,36
+2007,los angeles clippers,23
+2007,los angeles lakers,57
+2007,memphis grizzlies,22
+2007,miami heat,15
+2007,milwaukee bucks,26
+2007,minnesota timberwolves,22
+2007,new orleans pelicans,56
+2007,new york knicks,23
+2007,oklahoma city thunder,20
+2007,orlando magic,52
+2007,philadelphia 76ers,40
+2007,phoenix suns,55
+2007,portland trail blazers,41
+2007,sacramento kings,38
+2007,san antonio spurs,56
+2007,toronto raptors,41
+2007,utah jazz,54
+2007,washington wizards,43
+2006,atlanta hawks,30
+2006,boston celtics,24
+2006,brooklyn nets,41
+2006,chicago bulls,49
+2006,charlotte hornets,33
+2006,cleveland cavaliers,50
+2006,dallas mavericks,67
+2006,denver nuggets,45
+2006,detroit pistons,53
+2006,golden state warriors,42
+2006,houston rockets,52
+2006,indiana pacers,35
+2006,los angeles clippers,40
+2006,los angeles lakers,42
+2006,memphis grizzlies,22
+2006,miami heat,44
+2006,milwaukee bucks,28
+2006,minnesota timberwolves,32
+2006,new orleans pelicans,39
+2006,new york knicks,33
+2006,oklahoma city thunder,31
+2006,orlando magic,40
+2006,philadelphia 76ers,35
+2006,phoenix suns,61
+2006,portland trail blazers,32
+2006,sacramento kings,33
+2006,san antonio spurs,58
+2006,toronto raptors,47
+2006,utah jazz,51
+2006,washington wizards,41
+2005,atlanta hawks,26
+2005,boston celtics,33
+2005,brooklyn nets,49
+2005,chicago bulls,41
+2005,charlotte hornets,26
+2005,cleveland cavaliers,50
+2005,dallas mavericks,60
+2005,denver nuggets,44
+2005,detroit pistons,64
+2005,golden state warriors,34
+2005,houston rockets,34
+2005,indiana pacers,41
+2005,los angeles clippers,47
+2005,los angeles lakers,45
+2005,memphis grizzlies,49
+2005,miami heat,52
+2005,milwaukee bucks,40
+2005,minnesota timberwolves,33
+2005,new orleans pelicans,38
+2005,new york knicks,23
+2005,oklahoma city thunder,35
+2005,orlando magic,36
+2005,philadelphia 76ers,38
+2005,phoenix suns,54
+2005,portland trail blazers,21
+2005,sacramento kings,44
+2005,san antonio spurs,63
+2005,toronto raptors,27
+2005,utah jazz,41
+2005,washington wizards,42
+2004,atlanta hawks,13
+2004,boston celtics,45
+2004,brooklyn nets,42
+2004,chicago bulls,47
+2004,charlotte hornets,18
+2004,cleveland cavaliers,42
+2004,dallas mavericks,58
+2004,denver nuggets,49
+2004,detroit pistons,54
+2004,golden state warriors,34
+2004,houston rockets,51
+2004,indiana pacers,44
+2004,los angeles clippers,37
+2004,los angeles lakers,34
+2004,memphis grizzlies,45
+2004,miami heat,59
+2004,milwaukee bucks,30
+2004,minnesota timberwolves,44
+2004,new orleans pelicans,18
+2004,new york knicks,33
+2004,oklahoma city thunder,52
+2004,orlando magic,36
+2004,philadelphia 76ers,43
+2004,phoenix suns,62
+2004,portland trail blazers,27
+2004,sacramento kings,50
+2004,san antonio spurs,59
+2004,toronto raptors,33
+2004,utah jazz,26
+2004,washington wizards,45
+2003,atlanta hawks,28
+2003,boston celtics,36
+2003,brooklyn nets,47
+2003,chicago bulls,23
+2003,charlotte hornets,NA
+2003,cleveland cavaliers,35
+2003,dallas mavericks,52
+2003,denver nuggets,43
+2003,detroit pistons,54
+2003,golden state warriors,37
+2003,houston rockets,45
+2003,indiana pacers,61
+2003,los angeles clippers,28
+2003,los angeles lakers,56
+2003,memphis grizzlies,50
+2003,miami heat,42
+2003,milwaukee bucks,41
+2003,minnesota timberwolves,58
+2003,new orleans pelicans,41
+2003,new york knicks,39
+2003,oklahoma city thunder,37
+2003,orlando magic,21
+2003,philadelphia 76ers,33
+2003,phoenix suns,29
+2003,portland trail blazers,41
+2003,sacramento kings,55
+2003,san antonio spurs,57
+2003,toronto raptors,33
+2003,utah jazz,42
+2003,washington wizards,25
+2002,atlanta hawks,35
+2002,boston celtics,44
+2002,brooklyn nets,49
+2002,chicago bulls,30
+2002,charlotte hornets,NA
+2002,cleveland cavaliers,17
+2002,dallas mavericks,60
+2002,denver nuggets,17
+2002,detroit pistons,50
+2002,golden state warriors,38
+2002,houston rockets,43
+2002,indiana pacers,48
+2002,los angeles clippers,27
+2002,los angeles lakers,50
+2002,memphis grizzlies,28
+2002,miami heat,25
+2002,milwaukee bucks,42
+2002,minnesota timberwolves,51
+2002,new orleans pelicans,47
+2002,new york knicks,37
+2002,oklahoma city thunder,40
+2002,orlando magic,42
+2002,philadelphia 76ers,48
+2002,phoenix suns,44
+2002,portland trail blazers,50
+2002,sacramento kings,59
+2002,san antonio spurs,60
+2002,toronto raptors,24
+2002,utah jazz,47
+2002,washington wizards,37
+2001,atlanta hawks,33
+2001,boston celtics,49
+2001,brooklyn nets,52
+2001,chicago bulls,21
+2001,charlotte hornets,44
+2001,cleveland cavaliers,29
+2001,dallas mavericks,57
+2001,denver nuggets,27
+2001,detroit pistons,50
+2001,golden state warriors,21
+2001,houston rockets,28
+2001,indiana pacers,42
+2001,los angeles clippers,39
+2001,los angeles lakers,58
+2001,memphis grizzlies,23
+2001,miami heat,36
+2001,milwaukee bucks,41
+2001,minnesota timberwolves,50
+2001,new orleans pelicans,NA
+2001,new york knicks,30
+2001,oklahoma city thunder,45
+2001,orlando magic,44
+2001,philadelphia 76ers,43
+2001,phoenix suns,36
+2001,portland trail blazers,49
+2001,sacramento kings,61
+2001,san antonio spurs,58
+2001,toronto raptors,42
+2001,utah jazz,44
+2001,washington wizards,37
+2000,atlanta hawks,25
+2000,boston celtics,36
+2000,brooklyn nets,26
+2000,chicago bulls,15
+2000,charlotte hornets,46
+2000,cleveland cavaliers,30
+2000,dallas mavericks,53
+2000,denver nuggets,40
+2000,detroit pistons,32
+2000,golden state warriors,17
+2000,houston rockets,45
+2000,indiana pacers,41
+2000,los angeles clippers,31
+2000,los angeles lakers,56
+2000,memphis grizzlies,23
+2000,miami heat,50
+2000,milwaukee bucks,52
+2000,minnesota timberwolves,47
+2000,new orleans pelicans,NA
+2000,new york knicks,48
+2000,oklahoma city thunder,44
+2000,orlando magic,43
+2000,philadelphia 76ers,56
+2000,phoenix suns,51
+2000,portland trail blazers,50
+2000,sacramento kings,55
+2000,san antonio spurs,58
+2000,toronto raptors,47
+2000,utah jazz,53
+2000,washington wizards,19

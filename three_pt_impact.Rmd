@@ -12,50 +12,24 @@ library(tidyr)
 library(stringr)
 ```
 
-Read in the data sets (advanced_stats.csv, nba_salaries.csv, nba_team_wins.csv, 
-shooting_opponent.csv, shooting_team.csv, total_opponent.csv, total_team.csv)
+Reading in the relevant data sets
 ```{r}
-nba_salaries <- read.csv("./data/nba_salaries.csv")
 nba_team_wins <- read.csv("./data/nba_team_wins.csv")
-
 advanced_stats <- read.csv("./data/advanced_stats.csv")
+shooting_stats <- read.csv("./data/shooting_stats.csv")
+total_stats <- read.csv("./data/total_stats.csv")
 
-shooting_stats <- read.csv("./data/shooting_team.csv")
-opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
-
-total_stats <- read.csv("./data/total_team.csv")
-opponent_total_stats <- read.csv("./data/total_opponent.csv")
-
-gdp_deflator <- read.csv("./data/gdp_deflator_by_year.csv")
-
-# View(nba_salaries)
-# View(nba_team_wins)
-# View(advanced_stats)
-# View(shooting_stats)
-# View(opponent_shooting_stats)
-# View(total_stats)
-# View(opponent_total_stats)
-# View(gdp_deflator)
-
-# Get rid of the asterisks in every Team Name in advanced_stats.csv
-advanced_stats <- read.csv("./data/advanced_stats.csv")
-advanced_stats
-advanced_stats$team <- stringr::str_replace(advanced_stats$team, '\\*', '')
-advanced_stats
-
-create_wins_long <- function(wins) {
-  # NOTE THAT THIS FUNCTION USES nba_team_wins, I THINK IT SHOULD TECHNICALLY USE "wins"
-  # which is more specific to what was actually passed into this function create_wins_long.
-	wins_long <- nba_team_wins %>% pivot_longer(cols = names(nba_team_wins)[-1], names_to="team", values_to = "wins") %>% mutate(team = str_replace_all(team, "\\.", " "))
-	
-	wins_long$team <- str_to_lower(str_trim(wins_long$team))
-	
-	return(wins_long)
+create_stat_to_wins <- function(stat) {
+	merged_data <- left_join(stat, nba_team_wins, by = c("year", "team"))
+	merged_data <- na.omit(merged_data)
+	return(merged_data)
 }
-# nba_team_wins
-wins_long <- create_wins_long(nba_team_wins)
-wins_long
+```
 
-
+Plotting wins over field goal attempts, FG%, 3PTs made, 3PTs attempted, 2PTs
+made, 2PTs attempted.
+```{r}
+total_stats_to_wins <- create_stat_to_wins(total_stats)
+total_stats_to_wins
 ```
 
