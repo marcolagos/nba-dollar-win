@@ -20,13 +20,13 @@ nba_team_wins <- read.csv("./data/nba_team_wins.csv")
 
 advanced_stats <- read.csv("./data/advanced_stats.csv")
 
-shooting_stats <- read.csv("./data/shooting_team.csv")
-opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
+shooting_stats <- read.csv("./data/shooting_stats.csv")
+opponent_shooting_stats <- read.csv("./data/opponent_shooting_stats.csv")
 
-total_stats <- read.csv("./data/total_team.csv")
-opponent_total_stats <- read.csv("./data/total_opponent.csv")
+total_stats <- read.csv("./data/total_stats.csv")
+opponent_total_stats <- read.csv("./data/opponent_total_stats.csv")
 
-gdp_deflator <- read.csv("./data/gdp_deflator_by_year.csv")
+gdp_deflator <- read.csv("./data/gdp_by_year.csv")
 
 # View(nba_salaries)
 # View(nba_team_wins)
@@ -36,6 +36,8 @@ gdp_deflator <- read.csv("./data/gdp_deflator_by_year.csv")
 # View(total_stats)
 # View(opponent_total_stats)
 # View(gdp_deflator)
+
+total_stats
 ```
 
 Linear regression plot of team wins on total team salary. There needs to be 
@@ -104,6 +106,9 @@ advanced_stats <- read.csv("./data/advanced_stats.csv")
 advanced_stats
 advanced_stats$team <- stringr::str_replace(advanced_stats$team, '\\*', '')
 advanced_stats
+
+total_stats$team <- stringr::str_replace(total_stats$team, '\\*', '')
+total_stats
 
 # names(advanced_stats)[] = "new_column_name"
 
@@ -177,6 +182,16 @@ advanced_stats_to_wins
 advanced_stats_to_wins <- na.omit(advanced_stats_to_wins)
 advanced_stats_to_wins
 
+# 616 by 27
+total_stats_to_wins <- create_advanced_stats_to_wins(total_stats, wins_long_res)
+total_stats_to_wins
+
+# 554 by 27
+total_stats_to_wins <- na.omit(total_stats_to_wins)
+total_stats_to_wins
+
+
+
 ```
 Making the plot of team wins over advanced stats for the team for that year. Any NULL wins have been removed.
 ```{r}
@@ -197,8 +212,72 @@ for (col_i in seq(from = 3, to = 29, by = 1)) {
   
   plot(advanced_stats_to_wins[,col_i], advanced_stats_to_wins$wins, xlab = colnames(advanced_stats_to_wins)[col_i], ylab = "wins")
   
+  # Warning: NAs introduced by coercionWarning: no non-missing arguments to min; returning InfWarning: no non-missing arguments to max; returning -InfError in plot.window(...) : need finite 'xlim' values
+  
 }
 
+
+
+```
+```{r}
+
+col_inds_vec <- seq(from = 3, to = 26, by = 1)
+
+rsquared_vec <- c()
+rsquared_adj_vec <- c()
+for (col_i in col_inds_vec) {
+  # Column Index 3 should be "Age"
+  # Column Index 29 should be "year"
+  
+  
+  plot(total_stats_to_wins[,col_i], total_stats_to_wins$wins, xlab = colnames(total_stats_to_wins)[col_i], ylab = "wins")
+  
+  # Warning: NAs introduced by coercionWarning: no non-missing arguments to min; returning InfWarning: no non-missing arguments to max; returning -InfError in plot.window(...) : need finite 'xlim' values
+  
+  cur_mod <- lm(total_stats_to_wins$wins ~ total_stats_to_wins[,col_i])
+  # names(lm$coefficients) <- c("(Intercept)", "x1")
+  
+  print("HI current col name is")
+  print(colnames(total_stats_to_wins)[col_i])
+  # print(summary(cur_mod))
+  print(summary(cur_mod)$r.squared)
+  print(summary(cur_mod)$adj.r.squared)
+  
+  rsquared_vec <- append(rsquared_vec, summary(cur_mod)$r.squared)
+  rsquared_adj_vec <- append(rsquared_adj_vec, summary(cur_mod)$adj.r.squared)
+}
+
+plot(x = col_inds_vec, y = rsquared_vec)
+
+plot(x = col_inds_vec, y = rsquared_adj_vec)
+
+rsquared_vec_sorted <- sort(rsquared_vec, decreasing=TRUE, index.return=TRUE)
+# rsquared_vec_sorted$x
+
+rsquared_vec_sorted$ix
+# 7, 10, 13, 20, 25, 18
+
+for (cur_x_ind in 1:7) {
+  print(colnames(total_stats)[rsquared_vec_sorted$ix[cur_x_ind] + 2 ])
+}
+
+
+# FG%, 3P%, 2P%, AST, PTS, DRB, BLK
+
+mult_mod <- lm(total_stats_to_wins$wins ~ total_stats_to_wins[,7]
+               + total_stats_to_wins[,10]
+               + total_stats_to_wins[,13]
+               + total_stats_to_wins[,20]
+               + total_stats_to_wins[,25]
+               + total_stats_to_wins[,18]
+               + total_stats_to_wins[,22])
+
+for (num_x_to_include in 1:24) {
+  
+}
+summary(mult_mod)
+print(summary(mult_mod)$r.squared)
+print(summary(mult_mod)$adj.r.squared)
 ```
 Making the plot of team wins over total salary paid to players for that year. The
 salaries have been adjusted and any NULL wins have been removed.

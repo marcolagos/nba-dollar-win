@@ -1,0 +1,148 @@
+---
+title: "general_before_main"
+author: "Zachary Katz"
+date: "2023-04-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+nba_salaries <- read.csv("./data/nba_salaries.csv")
+nba_team_wins <- read.csv("./data/nba_team_wins.csv")
+
+advanced_stats <- read.csv("./data/advanced_stats.csv")
+
+shooting_stats <- read.csv("./data/shooting_team.csv")
+opponent_shooting_stats <- read.csv("./data/shooting_opponent.csv")
+
+total_stats <- read.csv("./data/total_team.csv")
+opponent_total_stats <- read.csv("./data/total_opponent.csv")
+
+gdp_deflator <- read.csv("./data/gdp_deflator_by_year.csv")
+
+# View(nba_salaries)
+# View(nba_team_wins)
+# View(advanced_stats)
+# View(shooting_stats)
+# View(opponent_shooting_stats)
+# View(total_stats)
+# View(opponent_total_stats)
+# View(gdp_deflator)
+
+# Get rid of the asterisks in every Team Name in advanced_stats.csv
+advanced_stats <- read.csv("./data/advanced_stats.csv")
+advanced_stats
+advanced_stats$team <- stringr::str_replace(advanced_stats$team, '\\*', '')
+advanced_stats
+
+```
+
+```{r}
+advanced_stats
+class(advanced_stats[,2])
+advanced_stats[,2][1]
+advanced_stats[,2][2]
+advanced_stats[,2][3]
+
+dim(advanced_stats)
+advanced_stats <- na.omit(advanced_stats)
+dim(advanced_stats)
+
+# ifelse(advanced_stats$year == cur_year, 1, 0)
+
+years_vec <- seq(from = 2000, to = 2019, by = 1)
+# for (cur_year in years_vec) {
+# advanced_stats_only_cur_year <- advanced_stats[advanced_stats$year == cur_year,]
+# print(dim(advanced_stats_only_cur_year))
+# 
+# col_inds_vec <- seq(from = 3, to = 20, by = 1)
+# for (cur_x_ind in col_inds_vec) {
+#   mu_of_cur_x_cur_year <- mean(advanced_stats_only_cur_year[,cur_x_ind])
+#   
+# }
+# }
+
+any(advanced_stats["Age"] == "26.9")
+
+any(is.na(advanced_stats["Age"]))
+any(is.na(advanced_stats["W"]))
+
+colnames(advanced_stats)[28]
+
+alpha_level <- 0.05
+
+# If alpha is 0.05, then area_to_the_left should be 0.975
+area_to_the_left <- (1.0 - (alpha_level/2.0))
+area_to_the_left
+norm_crit_value <- qnorm(area_to_the_left, mean = 0, sd = 1, lower.tail = TRUE)
+norm_crit_value
+
+col_inds_vec <- seq(from = 3, to = 28, by = 1)
+for (cur_x_ind in col_inds_vec) {
+  # if cur_x_ind corresponds to the "Arena" column,
+  # then skip this current iteration
+  # because the "Arena" column contains string values
+  # which obviously can not be averaged.
+  if (cur_x_ind == 26) {
+    next
+  }
+  
+  cur_x_means <- c()
+  cur_x_sds <- c()
+  cur_x_lower_bounds <- c()
+  cur_x_upper_bounds <- c()
+  
+  print("HI")
+  print(colnames(advanced_stats)[cur_x_ind])
+  for (cur_year in years_vec) {
+    advanced_stats_only_cur_year <- advanced_stats[advanced_stats$year == cur_year,]
+    # advanced_stats_only_cur_year <- advanced_stats[,cur_x_ind]
+    
+    mu_of_cur_x_cur_year <- mean(advanced_stats_only_cur_year[,cur_x_ind])
+    sd_of_cur_x_cur_year <- sd(advanced_stats_only_cur_year[,cur_x_ind])
+    
+    if (cur_x_ind == 3) {
+      print(sd_of_cur_x_cur_year)
+    }
+    
+    cur_x_means <- append(cur_x_means, mu_of_cur_x_cur_year)
+    cur_x_sds <- append(cur_x_sds, sd_of_cur_x_cur_year)
+    cur_x_lower_bounds <- append(cur_x_lower_bounds, mu_of_cur_x_cur_year - norm_crit_value*sd_of_cur_x_cur_year)
+    cur_x_upper_bounds <- append(cur_x_upper_bounds, mu_of_cur_x_cur_year + norm_crit_value*sd_of_cur_x_cur_year)
+  }
+  
+  # Make a plot of the mean of the current x-variable over the 20 years.
+  
+
+  print(cur_x_means)
+  if (cur_x_ind == 3) {
+    print("cur_x_means is")
+    print(cur_x_means)
+    print("cur_x_lower_bounds is")
+    print(cur_x_lower_bounds)
+  }
+  
+  min_y_lower_bound <- min(cur_x_lower_bounds)
+  max_y_upper_bound <- max(cur_x_upper_bounds)
+  midpoint_y <- ((max_y_upper_bound + min_y_lower_bound)/2.0)
+  half_range_y <- ((max_y_upper_bound - min_y_lower_bound)/2.0)
+  
+  ylim_lower_bound <- (midpoint_y - half_range_y*1.5)
+  ylim_upper_bound <- (midpoint_y + half_range_y*1.5)
+  
+  #plot(years_vec, cur_x_means, xlab = "Year", ylab = colnames(advanced_stats)[cur_x_ind],
+  #     ylim = c(min_y_lower_bound-2, max_y_upper_bound+2))
+  plot(years_vec, cur_x_means, xlab = "Year", ylab = colnames(advanced_stats)[cur_x_ind],
+       ylim = c(ylim_lower_bound, ylim_upper_bound))
+  for (cur_year_ind in 1:length(years_vec)) {
+    lines(c(years_vec[cur_year_ind], years_vec[cur_year_ind]), c(cur_x_lower_bounds[cur_year_ind], cur_x_upper_bounds[cur_year_ind]))
+  }
+}
+
+
+
+
+```
