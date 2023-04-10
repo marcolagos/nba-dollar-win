@@ -15,6 +15,7 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(scales)
+library(glmnet)
 ```
 Read in csv files:
 ```{r}
@@ -26,6 +27,8 @@ total_salary_by_team <- read.csv("./data/total_salary_by_team.csv")
 nba_team_wins <- read.csv("./data/nba_team_wins.csv")
 # See Report advanced stats description
 advanced_stats <- read.csv("./data/advanced_stats.csv")
+# See Report advanced stats description
+advanced_stats_2021 <- read.csv("./data/2021_advanced.csv")
 # See Report shooting stats description
 shooting_stats <- read.csv("./data/shooting_stats.csv")
 # See Report shooting stats description
@@ -34,6 +37,7 @@ opponent_shooting_stats <- read.csv("./data/opponent_shooting_stats.csv")
 total_stats <- read.csv("./data/total_stats.csv")
 # See Report total stats description
 opponent_total_stats <- read.csv("./data/opponent_total_stats.csv")
+
 
 # View(nba_salaries)
 # View(nba_team_wins)
@@ -163,16 +167,16 @@ Basic Visualization (Stacked Bar Plot)
 # =========================================================
 #				Stacked Bar Plot
 # =========================================================
-# Create a subset of total_stats dataframe for selected variables
+# Creating a subset of total_stats dataframe for selected variables
 team_stats <- total_stats[, c("team", "PTS", "AST", "TRB", "TOV")]
 
-# Calculate the total of each variable by team
+# Calculating the total of each variable by team
 team_stats_summary <- aggregate(. ~ team, data = team_stats, FUN = sum)
 
-# Convert data from wide to long format
+# Converting data from wide to long format
 team_stats_long <- gather(team_stats_summary, key = "stat", value = "total", -team)
 
-# Create the stacked bar chart
+# Creating the stacked bar chart
 ggplot(team_stats_long, aes(x = team, y = total, fill = stat)) +
   geom_bar(stat = "identity") +
   ggtitle("Composition of Total Team Statistics") +
@@ -185,38 +189,161 @@ Basic Analysis (Principal Component Analysis)
 ```{r}
 nba_total_to_wins <- create_stat_to_wins(total_stats)
 
-# Remove non-numeric columns
+# Removing non-numeric columns
 numeric_data <- nba_total_to_wins[, sapply(nba_total_to_wins, is.numeric)]
 
-# Remove rows with missing values
+# Removing rows with missing values
 numeric_data <- na.omit(numeric_data)
 
 scaled_data <- scale(numeric_data)
 pca <- prcomp(scaled_data, center = TRUE, scale. = TRUE)
 
-# Extract the first two principal components
+# Extracting the first two principal components
 pca_data <- data.frame(pca$x[,1:2])
 
-# Extract the loadings
+# Extracting the loadings
 loadings <- data.frame(pca$rotation[,1:2])
 
-# Perform PCA on numeric data
+# Performing PCA on numeric data
 pca <- prcomp(numeric_data, center = TRUE, scale. = TRUE)
 
 # Extract the first two principal components and create a data frame
 pca_data <- data.frame(pca$x[, 1:2], team = nba_total_to_wins$team)
 
-# Extract the loadings and create a data frame
+# Extracting loadings and creating a data frame
 loadings <- data.frame(variable = colnames(numeric_data), 
                        PC1 = pca$rotation[, 1], 
                        PC2 = pca$rotation[, 2])
 
-# Plot the loadings on the first two principal components
+# Plotting the loadings on the first two principal components
 ggplot(pca_data, aes(x = PC1, y = PC2)) + 
   geom_point(aes(color = team)) + 
   geom_hline(yintercept = 0, linetype = "dashed") + 
   geom_vline(xintercept = 0, linetype = "dashed") + 
   geom_text(data = loadings, aes(x = PC1, y = PC2, label = variable), size = 3) +
   ggtitle("PCA: Loadings Plot")
+
+```
+Generating Model using LASSO selection on Advanced NBA Statistics
+```{r}
+add_wins_vector <- function(data) {
+	data_to_wins <- left_join(data, nba_team_wins, by = c("year", "team"))
+	data_to_wins <- na.omit(data_to_wins)
+	return(data_to_wins)
+}
+
+generate_advanced_stats_model <- function(data, exclude) {
+
+	data_to_wins <- add_wins_vector(data)
+  
+	rsquared_vec <- c()
+	rsquared_adj_vec <- c()
+
+	cols <- ncol(data_to_wins)  
+	column_iterator <- seq(from = 1, to = cols, by = 1)
+  
+	col_names_to_avoid <- exclude
+	predictor_variables_df <- data_to_wins[!names(data_to_wins) %in% col_names_to_avoid]
+	
+	print("Number of Regressors:")	
+	print(dim(predictor_variables_df)[2])
+
+	print("LASSO Model for prediction of NBA team success based on NBA Advanced Stats")
+	print("==================================================")
+	print("Predictor Variables for LASSO model:")
+	print(dim(predictor_variables_df))
+	print(colnames(predictor_variables_df))
+  
+	wins_col_vector <- data_to_wins$wins
+
+	print("==================================================")
+	print("Response Variable for LASSO Model:")
+	print(length(wins_col_vector))
+	
+	stopifnot(!any(is.na(predictor_variables_df)), !any(is.na(wins_col_vector)))
+	lasso_model <- glmnet(x = data.matrix(predictor_variables_df), y = data.matrix(wins_col_vector), alpha = 1)
+	num_cols <- dim(lasso_model$beta)[2]
+
+	print("==================================================")
+	print("Lambda Values tested by LASSO model:")
+	print("---------------------------------------------------")
+	print(lasso_model$lambda[num_cols])
+	print("")
+	print("Beta Values generated by LASSO model (best lambda):")
+	print("---------------------------------------------------")
+	print(lasso_model$beta[,num_cols])
+	print("")
+	print("LASSO model R-squared:")
+	print("---------------------------------------------------")
+	print(lasso_model$dev.ratio[num_cols])
+	print("==================================================")
+	
+	# Creating a plot of the lambda values tested by the Lasso model
+	plot(log(lasso_model$lambda), lasso_model$dev.ratio, type = "b", xlab = "Log Lambda", ylab = "Deviance Ratio", main = "Lasso Model: Lambda vs. Deviance Ratio")
+	
+	# Create a sample matrix
+	beta_vals <- lasso_model$beta[,num_cols]
+	barplot(beta_vals, col="blue", main="Lasso Model Beta Values", las=2)
+	par(cex.axis=0.4, cex.main=0.4)
+	
+	return (lasso_model)
+}
+
+aparam <- c("Rk", "team", "W","L", "PW", "PL", "MOV", "Arena", "wins", "SRS", "ORtg", "DRtg", "NRtg", "TS.", "eFG..1", "eFG.", "FT.FGA")
+advanced_stats_lasso_model <- generate_advanced_stats_model(advanced_stats, aparam)
+```
+
+```{r}
+predict_team_success <- function(team, lasso_model, exclude) {
+	advanced_stats_team <- advanced_stats[advanced_stats$team == team,]
+	
+	advanced_stats_team_wins <- add_wins_vector(advanced_stats_team)
+	advanced_stats_team_wins_predictors <- advanced_stats_team_wins[!names(advanced_stats_team_wins) %in% exclude]
+
+	num_cols <- dim(lasso_model$beta)[2]
+	best_lambda_value <- lasso_model$lambda[num_cols]
+	
+	print("Number of Regressors:")
+	print(dim(advanced_stats_team_wins_predictors)[2])
+	
+	results <- predict(lasso_model, newx=data.matrix(advanced_stats_team_wins_predictors), s=best_lambda_value, type="response")
+	
+	plot(advanced_stats_team_wins$year, results, col = "red", xlab = "Year", ylab = cat("Wins for ", team, ""))
+	points(advanced_stats_team_wins$year, advanced_stats_team_wins$wins, col = "grey")
+	legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("grey", "green"), pch=1)
+	
+	return(results)
+}
+
+results <- predict_team_success("houston rockets", advanced_stats_lasso_model, aparam)
+
+```
+Applying our model to future data
+```{r}
+predict_on_future_data <- function(future_data, lasso_model, exclude) {
+	future_data_predictors <- future_data[!names(future_data) %in% exclude]
+	
+	year_str <- future_data$year[1]
+
+	num_cols <- dim(lasso_model$beta)[2]
+	best_lambda_value <- lasso_model$lambda[num_cols]
+	
+	print("Number of Regressors:")
+	print(dim(future_data_predictors)[2])
+	
+	new_year_string <- paste("Wins for Teams in", year_str)
+	
+	results <- predict(lasso_model, newx=data.matrix(future_data_predictors), s=best_lambda_value, type="response")
+	
+	team_inds <- seq(from=1, to=length(future_data$team), by=1)
+	plot(team_inds, results, col = "red", xlab = "Team", ylab = new_year_string, ylim=c(10, 90))
+	text(seq_along(future_data$team), rep(0.5, length(future_data$team)), labels = future_data$team, srt = 90, adj = c(0, 0.5), xpd = TRUE, cex = 0.4)
+	points(team_inds, future_data$W, col = "grey")
+	legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
+	
+	return(results)
+}
+
+result_future <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model, aparam)
 
 ```
