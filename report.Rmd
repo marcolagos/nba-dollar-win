@@ -2,7 +2,9 @@
 title: "Report"
 author: "Zachary Katz"
 date: "2023-04-08"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -283,7 +285,7 @@ generate_advanced_stats_model <- function(data, exclude, selection_type, title) 
 	
 	# Create a sample matrix
 	beta_vals <- model$beta[,num_cols]
-	barplot(beta_vals, col="blue", main="Lasso Model Beta Values", las=2)
+	barplot(beta_vals, col="blue", main=title, las=2)
 	par(cex.axis=0.8, cex.main=1.0)
 	
 	return (model)
@@ -297,6 +299,9 @@ advanced_stats_ridge_model <- generate_advanced_stats_model(advanced_stats, apar
 
 advanced_stats_lasso_model_min <- generate_advanced_stats_model(advanced_stats, aparam_min, 1, "Lasso Model: Lambda vs. Deviance Ratio (Min AParams)")
 advanced_stats_ridge_model_min <- generate_advanced_stats_model(advanced_stats, aparam_min, 0, "Ridge Model: Lambda vs. Deviance Ratio (Min AParams)")
+```
+Model Evaluation
+```{r}
 ```
 
 ```{r}
@@ -322,11 +327,11 @@ predict_team_success <- function(team, model, exclude, title) {
 	return(results)
 }
 
-results_lasso <- predict_team_success("houston rockets", advanced_stats_lasso_model, aparam, "Lasso AParams")
-results_ridge <- predict_team_success("houston rockets", advanced_stats_ridge_model, aparam, "Ridge AParams")
+results_lasso <- predict_team_success("houston rockets", advanced_stats_lasso_model, aparam, "Lasso Model 1")
+results_ridge <- predict_team_success("houston rockets", advanced_stats_ridge_model, aparam, "Ridge Model 1")
 
-results_lasso_min <- predict_team_success("houston rockets", advanced_stats_lasso_model_min, aparam_min, "Lasso Min AParams")
-results_ridge_min <- predict_team_success("houston rockets", advanced_stats_ridge_model_min, aparam_min, "Ridge Min AParams")
+results_lasso_min <- predict_team_success("houston rockets", advanced_stats_lasso_model_min, aparam_min, "Lasso Model 2")
+results_ridge_min <- predict_team_success("houston rockets", advanced_stats_ridge_model_min, aparam_min, "Ridge Model 2")
 
 ```
 Applying our model to future data and conducting a residual analysis
@@ -404,19 +409,19 @@ check_residual_hetero <- function(residuals, predicted_values, title) {
 	  ggtitle(title)
 }
 
-plot_residuals(residuals_future_lasso$residuals, residuals_future_lasso$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso AParam Prediction")
-check_residual_normality(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso AParam Prediction")
-check_residual_hetero(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso AParam Prediction")
+plot_residuals(residuals_future_lasso$residuals, residuals_future_lasso$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso Model 1Prediction")
+check_residual_normality(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso Model 1 Prediction")
+check_residual_hetero(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso Model 1 Prediction")
 
-plot_residuals(residuals_future_ridge$residuals, residuals_future_ridge$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge AParam Prediction")
-check_residual_normality(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge AParam Prediction")
-check_residual_hetero(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge AParam Prediction")
+plot_residuals(residuals_future_ridge$residuals, residuals_future_ridge$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge Model 1 Prediction")
+check_residual_normality(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge Model 1 Prediction")
+check_residual_hetero(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge Model 1 Prediction")
 
-plot_residuals(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso Min AParam Prediction")
-check_residual_normality(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Lasso Min AParam Prediction")
-check_residual_hetero(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Lasso Min AParam Prediction")
+plot_residuals(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso Model 2 Prediction")
+check_residual_normality(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Lasso Model 2 Prediction")
+check_residual_hetero(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Model 2 AParam Prediction")
 
-plot_residuals(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge Min AParam Prediction")
-check_residual_normality(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Min AParam Prediction")
-check_residual_hetero(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Min AParam Prediction")
+plot_residuals(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge Model 2 Prediction")
+check_residual_normality(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Model 2 Prediction")
+check_residual_hetero(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Model 2 Prediction")
 ```
