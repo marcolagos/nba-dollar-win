@@ -29,6 +29,8 @@ opponent_total_stats <- read.csv("./data/opponent_total_stats.csv")
 gdp_by_year <- read.csv("./data/gdp_by_year.csv")
 cpi_by_year <- read.csv("./data/cpi_by_year.csv")
 
+advanced_stats_2021 <- read.csv("./data/2021_advanced.csv")
+
 # View(nba_salaries)
 # View(nba_team_wins)
 # View(advanced_stats)
@@ -53,21 +55,22 @@ clean_data <- function(data, path) {
 	return(data)
 }
 
-nba_salaries <- clean_data(nba_salaries, "./data/cnba_salaries.csv")
+# nba_salaries <- clean_data(nba_salaries, "./data/cnba_salaries.csv")
 
-nba_team_wins <- 
-	nba_team_wins %>% 
-	pivot_longer(cols = names(nba_team_wins)[-1], names_to="team", values_to = "wins") %>%
-	mutate(team = str_replace_all(team, "\\.", " "))
-nba_team_wins <- clean_data(nba_team_wins, "./data/nba_team_wins.csv")
+# nba_team_wins <- 
+# 	nba_team_wins %>% 
+# 	pivot_longer(cols = names(nba_team_wins)[-1], names_to="team", values_to = "wins") %>%
+# 	mutate(team = str_replace_all(team, "\\.", " "))
+# nba_team_wins <- clean_data(nba_team_wins, "./data/nba_team_wins.csv")
 
-advanced_stats <- clean_data(advanced_stats, "./data/advanced_stats.csv")
-shooting_stats <- clean_data(shooting_stats, "./data/shooting_stats.csv")
-opponent_shooting_stats <- clean_data(opponent_shooting_stats, "./data/opponent_shooting_stats.csv")
-total_stats <- clean_data(total_stats, "./data/total_stats.csv")
-opponent_total_stats <- clean_data(opponent_total_stats, "./data/opponent_total_stats.csv")
-gdp_by_year <- clean_data(gdp_by_year, "./data/gdp_by_year.csv")
-cpi_by_year <- clean_data(cpi_by_year, "./data/cpi_by_year.csv")
+# advanced_stats <- clean_data(advanced_stats, "./data/advanced_stats.csv")
+# shooting_stats <- clean_data(shooting_stats, "./data/shooting_stats.csv")
+# opponent_shooting_stats <- clean_data(opponent_shooting_stats, "./data/opponent_shooting_stats.csv")
+# total_stats <- clean_data(total_stats, "./data/total_stats.csv")
+# opponent_total_stats <- clean_data(opponent_total_stats, "./data/opponent_total_stats.csv")
+# gdp_by_year <- clean_data(gdp_by_year, "./data/gdp_by_year.csv")
+# cpi_by_year <- clean_data(cpi_by_year, "./data/cpi_by_year.csv")
+advanced_stats_2021 <- clean_data(advanced_stats_2021, "./data/2021_advanced.csv")
 ```
 
 
