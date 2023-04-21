@@ -2,9 +2,7 @@
 title: "Report"
 author: "Zachary Katz"
 date: "2023-04-08"
-output:
-  pdf_document: default
-  html_document: default
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -285,7 +283,7 @@ generate_advanced_stats_model <- function(data, exclude, selection_type, title) 
 	
 	# Create a sample matrix
 	beta_vals <- model$beta[,num_cols]
-	barplot(beta_vals, col="blue", main=title, las=2)
+	barplot(beta_vals, col="blue", main="Lasso Model Beta Values", las=2)
 	par(cex.axis=0.8, cex.main=1.0)
 	
 	return (model)
@@ -299,9 +297,6 @@ advanced_stats_ridge_model <- generate_advanced_stats_model(advanced_stats, apar
 
 advanced_stats_lasso_model_min <- generate_advanced_stats_model(advanced_stats, aparam_min, 1, "Lasso Model: Lambda vs. Deviance Ratio (Min AParams)")
 advanced_stats_ridge_model_min <- generate_advanced_stats_model(advanced_stats, aparam_min, 0, "Ridge Model: Lambda vs. Deviance Ratio (Min AParams)")
-```
-Model Evaluation
-```{r}
 ```
 
 ```{r}
@@ -327,11 +322,12 @@ predict_team_success <- function(team, model, exclude, title) {
 	return(results)
 }
 
-results_lasso <- predict_team_success("houston rockets", advanced_stats_lasso_model, aparam, "Lasso Model 1")
-results_ridge <- predict_team_success("houston rockets", advanced_stats_ridge_model, aparam, "Ridge Model 1")
 
-results_lasso_min <- predict_team_success("houston rockets", advanced_stats_lasso_model_min, aparam_min, "Lasso Model 2")
-results_ridge_min <- predict_team_success("houston rockets", advanced_stats_ridge_model_min, aparam_min, "Ridge Model 2")
+results_lasso <- predict_team_success("houston rockets", advanced_stats_lasso_model, aparam, "Lasso AParams")
+results_ridge <- predict_team_success("houston rockets", advanced_stats_ridge_model, aparam, "Ridge AParams")
+
+results_lasso_min <- predict_team_success("houston rockets", advanced_stats_lasso_model_min, aparam_min, "Lasso Min AParams")
+results_ridge_min <- predict_team_success("houston rockets", advanced_stats_ridge_model_min, aparam_min, "Ridge Min AParams")
 
 ```
 Applying our model to future data and conducting a residual analysis
@@ -340,6 +336,7 @@ predict_on_future_data <- function(future_data, model, exclude, title) {
 	  future_data_predictors <- future_data[!names(future_data) %in% exclude]
 	  
 	  year_str <- future_data$year[1]
+	  
 	  
 	  num_cols <- dim(model$beta)[2]
 	  best_lambda_value <- model$lambda[num_cols]
@@ -358,18 +355,180 @@ predict_on_future_data <- function(future_data, model, exclude, title) {
 	  points(team_inds, future_data$W, col = "grey")
 	  legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
 	  
+
+	
+	  
+	  
 	  # Compute the residuals
 	  residuals <- results - future_data$W
+	  
+	  print(dim(results))
+	  print(length(results[,1]))
+	  print(length(residuals))
+	   
+	  print(results)
+	  plot(results, residuals, col = "red", xlab = "Predicted values", ylab = "Residuals", main="Residuals versus predicted values")
 	  
 	  # Return both the predicted values and residuals
 	  return(list(predictions = results, residuals = residuals))
 }
 
 
-residuals_future_lasso <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model, aparam, "Lasso AParam Prediction on Future Data")
+compute_studentized_residuals <- function(future_data, model, res_vec, exclude, k, pred_vals) {
+  # Need the MS_Res of our model on the n data points
+  # For every integer i (1 <= i <= n), we need the h_ii, which depends on n, the
+  # value of x_i, the value of the sample mean of x (so x_bar or mu_x_hat), and
+  # finally the value of S_xx.
+  
+  n_points <- length(res_vec)
+  
+  names_of_vars_that_model_uses <- names(advanced_stats_ridge_model$beta[,100])
+  # future_data_predictors <- future_data[!names(future_data) %in% exclude]
+  future_data_predictors <- future_data[names(future_data) %in% names_of_vars_that_model_uses]
+  
+  # k <- dim(future_data_predictors)
+  
+  
+  # future_data$W is true value of y
+  SS_Res <- sum((future_data$W - res_vec)^2)
+  MS_Res <- SS_Res / (n_points - k - 1)
+  
+  # S_xx <- sum((future))
+  
+  
+  # H = X (X^T *X)^-1 X^T
+  X_mat <- as.matrix(future_data_predictors)
+  print(dim(X_mat))
+  print(n_points)
+  
+  I_mat <- diag(k)
+  X_t_times_X <- t(X_mat) %*% X_mat
+  dim(X_t_times_X)
+  scaled_I_mat <- model$lambda[dim(model$beta)[2]] * I_mat
+  X_prod_before_inv <- (X_t_times_X) + scaled_I_mat
+  hat_matrix <- (X_mat %*% solve(X_prod_before_inv) %*% t(X_mat))
+  
+  hat_matrix_diag <- diag(hat_matrix)
+  hat_diag_len <- length(hat_matrix_diag)
+  print(hat_diag_len)
+  
+  # studres(model) will probably calculate Studentized Residuals
+  # but on the data that the model was trained on, which is not what
+  # we want to do.
+  # studres(model)
+  
+  stud_res_vec <- (res_vec)/(sqrt(MS_Res * (1-hat_matrix_diag)))
+  
+  #team_inds <- seq(from=1, to=length(future_data$team), by=1)
+	plot(pred_vals, stud_res_vec, col = "red", xlab = "Predicted values", ylab = "Studentized residuals", main="Studentized residuals versus predicted values")
+	
+
+	  
+	#points(team_inds, pred_vals, col = "grey")
+	#legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
+	  
+  return (stud_res_vec)
+}
+
+
+
+#residuals_future_lasso <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model, aparam, "Lasso AParam Prediction on Future Data")
 residuals_future_ridge <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model, aparam, "Ridge AParam Prediction on Future Data")
-residuals_future_lasso_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model_min, aparam_min, "Lasso Min AParam Prediction on Future Data")
-residuals_future_ridge_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model_min, aparam_min, "Ridge Min AParam Prediction on Future Data")
+#residuals_future_lasso_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model_min, aparam_min, "Lasso Min AParam Prediction on Future Data")
+#residuals_future_ridge_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model_min, aparam_min, "Ridge Min AParam Prediction on Future Data")
+
+# Lambda that the model ended up using:
+# model$lambda[dim(model$beta)[2]]
+
+
+
+k <- dim(advanced_stats_ridge_model$beta)[1]
+stud_residuals_future_lasso_min <- compute_studentized_residuals(advanced_stats_2021, advanced_stats_ridge_model, residuals_future_lasso_min$residuals, aparam_min, k, residuals_future_lasso_min$predictions)
+# aparm has "SRS", "DRtg", "FT.FGA"
+```
+```{r}
+training_data <- advanced_stats
+training_data
+model <- advanced_stats_lasso_model
+exclude <- aparam
+title <- "Lasso AParam Prediction on Training Data"
+# predict_on_training_data <- function(training_data, model, exclude, title) {
+  # training_data is 616 rows by 17 columns
+  # future_data would be 31 rows by 17 columns
+  
+  # Get rid of some columns so that the number of columns becomes 17 columns
+	  training_data_predictors <- training_data[!names(training_data) %in% exclude]
+	  # for (year_val in 2000:2019) {
+	  #   ifelse(training_data_predictors$year == year_val)
+	  # }
+	  
+	  print(training_data_predictors)
+	  
+	  num_cols <- dim(model$beta)[2]
+	  best_lambda_value <- model$lambda[num_cols]
+	  
+	  # 31 rows by 17 columns
+	  unique_team_names <- unique(training_data$team)
+	  
+	  results_for_teams <- c()
+	  true_wins_for_teams <- c()
+	  for (cur_team_name in unique_team_names) {
+	    print("BEFORE SELECTING JUST CUR_TEAM_NAME")
+	    print(cur_team_name)
+	    training_data_only_cur_team <- training_data[training_data$team == cur_team_name,]
+	    print("BEFORE EXCLUDING THE VARIABLES IN EXCLUDE")
+	    training_data_predictors_only_cur_team <-  training_data_only_cur_team[!names(training_data_only_cur_team) %in% exclude]
+	    
+	    # results_for_team should be 20 rows by 1 column
+	    print("BEFORE PREDICTING THE WINS FOR CURRENT TEAM")
+	    results_for_team <- predict(model, newx=as.matrix(training_data_predictors_only_cur_team), s=best_lambda_value, type="response")
+	    
+	    print("BEFORE CALCULATING THE MEAN OF PREDICTED WINS FOR CURRENT TEAM")
+	    results_for_team_mean <- mean(results_for_team)
+	    print("BEFORE ADDING THE MEAN OF PREDICTED WINS FOR CURRENT TEAM TO THE RESULTS_FOR_TEAMS")
+	    results_for_teams <- append(results_for_teams, results_for_team_mean)
+	    
+	    print("BEFORE CALCULATING THE MEAN OF ACTUAL WINS FOR CURRENT TEAM")
+	    true_win_for_team_mean <- mean(training_data_only_cur_team$W)
+	    print(true_win_for_team_mean)
+	    print("BEFORE ADDING THE MEAN OF PREDICTED WINS FOR CURRENT TEAM TO THE RESULTS_FOR_TEAMS")
+	    true_wins_for_teams <- append(true_wins_for_teams, true_win_for_team_mean)
+	  }
+	  
+	  
+	  year_str <- training_data$year[1]
+	  
+	  print("Number of Regressors:")
+	  print(dim(training_data_predictors)[2])
+	  print(names(training_data_predictors))
+	  
+	  new_year_string <- "Wins for Teams (Averaged across 20 seasons)"
+	  
+	  print(unique_team_names)
+	  print(length(unique_team_names))
+	  team_inds <- seq(from=1, to=length(unique_team_names), by=1)
+	  print(team_inds)
+	  print(results_for_teams)
+	  print(true_wins_for_teams)
+	  
+	  plot(team_inds, results_for_teams, col = "red", xlab = "Team", ylab = new_year_string, ylim=c(10, 90), main=title)
+	  
+	  points(team_inds, true_wins_for_teams, col = "grey")
+	  legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
+	  
+	  # Compute the residuals
+	  # residuals <- results - future_data$W
+	  
+	  # Return both the predicted values and residuals
+	  # return(list(predictions = results, residuals = residuals))
+#	  return (3)
+# }
+
+
+# predict_on_training_data(advanced_stats, advanced_stats_lasso_model, aparam, "Lasso AParam Prediction on Training Data")
+
+
+
 ```
 Conducting additional residual analysis
 ```{r}
@@ -409,19 +568,21 @@ check_residual_hetero <- function(residuals, predicted_values, title) {
 	  ggtitle(title)
 }
 
-plot_residuals(residuals_future_lasso$residuals, residuals_future_lasso$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso Model 1Prediction")
-check_residual_normality(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso Model 1 Prediction")
-check_residual_hetero(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso Model 1 Prediction")
+plot_residuals(residuals_future_lasso$residuals, residuals_future_lasso$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso AParam Prediction")
+check_residual_normality(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso AParam Prediction")
+check_residual_hetero(residuals_future_lasso$residuals, residuals_future_lasso$predictions, "Residual Analysis on Lasso AParam Prediction")
 
-plot_residuals(residuals_future_ridge$residuals, residuals_future_ridge$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge Model 1 Prediction")
-check_residual_normality(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge Model 1 Prediction")
-check_residual_hetero(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge Model 1 Prediction")
+plot_residuals(residuals_future_ridge$residuals, residuals_future_ridge$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge AParam Prediction")
+check_residual_normality(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge AParam Prediction")
+check_residual_hetero(residuals_future_ridge$residuals, residuals_future_ridge$predictions, "Residual Analysis on Ridge AParam Prediction")
 
-plot_residuals(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso Model 2 Prediction")
-check_residual_normality(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Lasso Model 2 Prediction")
-check_residual_hetero(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Model 2 AParam Prediction")
+plot_residuals(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, advanced_stats_2021$W, "Residual Analysis on Lasso Min AParam Prediction")
+check_residual_normality(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Lasso Min AParam Prediction")
+check_residual_hetero(residuals_future_lasso_min$residuals, residuals_future_lasso_min$predictions, "Residual Analysis on Lasso Min AParam Prediction")
 
-plot_residuals(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge Model 2 Prediction")
-check_residual_normality(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Model 2 Prediction")
-check_residual_hetero(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Model 2 Prediction")
+plot_residuals(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, advanced_stats_2021$W, "Residual Analysis on Ridge Min AParam Prediction")
+check_residual_normality(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Min AParam Prediction")
+check_residual_hetero(residuals_future_ridge_min$residuals, residuals_future_ridge_min$predictions, "Residual Analysis on Ridge Min AParam Prediction")
+
+
 ```
