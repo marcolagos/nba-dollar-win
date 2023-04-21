@@ -38,6 +38,10 @@ total_stats <- read.csv("./data/total_stats.csv")
 # See Report total stats description
 opponent_total_stats <- read.csv("./data/opponent_total_stats.csv")
 
+# advanced_stats.csv no longer has asterisks in some of its Team names,
+# so I do not need to run these two lines below:
+# advanced_stats$team <- stringr::str_replace(advanced_stats$team, '\\*', '')
+# advanced_stats
 
 # View(nba_salaries)
 # View(nba_team_wins)
@@ -83,6 +87,126 @@ print("NBA Opponent Total Stats CSV")
 describe(opponent_total_stats)
 print("==================================================")
 ```
+Basic Visualization of the Means and Variances of the X Variables
+```{r}
+# NOTE THAT THIS BLOCK OF CODE DOES CHANGE advanced_stats BY GETTING RID OF NA
+# VALUES IN advanced_stats.
+
+
+#advanced_stats
+#class(advanced_stats[,2])
+#advanced_stats[,2][1]
+#advanced_stats[,2][2]
+#advanced_stats[,2][3]
+
+#dim(advanced_stats)
+
+advanced_stats <- na.omit(advanced_stats)
+dim(advanced_stats)
+
+# ifelse(advanced_stats$year == cur_year, 1, 0)
+
+years_vec <- seq(from = 2000, to = 2019, by = 1)
+# for (cur_year in years_vec) {
+# advanced_stats_only_cur_year <- advanced_stats[advanced_stats$year == cur_year,]
+# print(dim(advanced_stats_only_cur_year))
+# 
+# col_inds_vec <- seq(from = 3, to = 20, by = 1)
+# for (cur_x_ind in col_inds_vec) {
+#   mu_of_cur_x_cur_year <- mean(advanced_stats_only_cur_year[,cur_x_ind])
+#   
+# }
+# }
+
+any(advanced_stats["Age"] == "26.9")
+
+any(is.na(advanced_stats["Age"]))
+any(is.na(advanced_stats["W"]))
+
+colnames(advanced_stats)[28]
+
+alpha_level <- 0.05
+
+# If alpha is 0.05, then area_to_the_left should be 0.975
+area_to_the_left <- (1.0 - (alpha_level/2.0))
+area_to_the_left
+norm_crit_value <- qnorm(area_to_the_left, mean = 0, sd = 1, lower.tail = TRUE)
+norm_crit_value
+
+generate_general_plots <- function(my_df) {
+col_inds_vec <- seq(from = 3, to = dim(my_df)[2], by = 1)
+for (cur_x_ind in col_inds_vec) {
+  # if cur_x_ind corresponds to the "Arena" column,
+  # then skip this current iteration
+  # because the "Arena" column contains string values
+  # which obviously can not be averaged.
+  if (cur_x_ind == 26) {
+    next
+  }
+  
+  cur_x_means <- c()
+  cur_x_sds <- c()
+  cur_x_lower_bounds <- c()
+  cur_x_upper_bounds <- c()
+  
+  print("HI")
+  print(colnames(my_df)[cur_x_ind])
+  for (cur_year in years_vec) {
+    advanced_stats_only_cur_year <- my_df[my_df$year == cur_year,]
+    # advanced_stats_only_cur_year <- advanced_stats[,cur_x_ind]
+    
+    mu_of_cur_x_cur_year <- mean(advanced_stats_only_cur_year[,cur_x_ind])
+    sd_of_cur_x_cur_year <- sd(advanced_stats_only_cur_year[,cur_x_ind])
+    
+    if (cur_x_ind == 3) {
+      print(sd_of_cur_x_cur_year)
+    }
+    
+    cur_x_means <- append(cur_x_means, mu_of_cur_x_cur_year)
+    cur_x_sds <- append(cur_x_sds, sd_of_cur_x_cur_year)
+    cur_x_lower_bounds <- append(cur_x_lower_bounds, mu_of_cur_x_cur_year - norm_crit_value*sd_of_cur_x_cur_year)
+    cur_x_upper_bounds <- append(cur_x_upper_bounds, mu_of_cur_x_cur_year + norm_crit_value*sd_of_cur_x_cur_year)
+  }
+  
+  # Make a plot of the mean of the current x-variable over the 20 years.
+  
+
+  print(cur_x_means)
+  if (cur_x_ind == 3) {
+    print("cur_x_means is")
+    print(cur_x_means)
+    print("cur_x_lower_bounds is")
+    print(cur_x_lower_bounds)
+  }
+  
+  min_y_lower_bound <- min(cur_x_lower_bounds)
+  max_y_upper_bound <- max(cur_x_upper_bounds)
+  midpoint_y <- ((max_y_upper_bound + min_y_lower_bound)/2.0)
+  half_range_y <- ((max_y_upper_bound - min_y_lower_bound)/2.0)
+  
+  ylim_lower_bound <- (midpoint_y - half_range_y*1.5)
+  ylim_upper_bound <- (midpoint_y + half_range_y*1.5)
+  
+  #plot(years_vec, cur_x_means, xlab = "Year", ylab = colnames(advanced_stats)[cur_x_ind],
+  #     ylim = c(min_y_lower_bound-2, max_y_upper_bound+2))
+  plot(years_vec, cur_x_means, xlab = "Year", ylab = colnames(my_df)[cur_x_ind],
+       ylim = c(ylim_lower_bound, ylim_upper_bound))
+  for (cur_year_ind in 1:length(years_vec)) {
+    lines(c(years_vec[cur_year_ind], years_vec[cur_year_ind]), c(cur_x_lower_bounds[cur_year_ind], cur_x_upper_bounds[cur_year_ind]))
+  }
+}
+
+}
+
+
+
+generate_general_plots(advanced_stats)
+
+generate_general_plots(total_stats)
+
+
+```
+
 Basic Visualization (Correlation Matrices)
 ```{r}
 # =========================================================
@@ -277,6 +401,11 @@ generate_advanced_stats_model <- function(data, exclude, selection_type, title) 
 	print("---------------------------------------------------")
 	print(model$dev.ratio[num_cols])
 	print("==================================================")
+	print("")
+	print("LASSO model ADJUSTED R-squared:")
+	print("---------------------------------------------------")
+	print(model$dev.ratio[num_cols])
+	print("==================================================")
 	
 	# Creating a plot of the lambda values tested by the Lasso model
 	plot(model$lambda, model$dev.ratio, type = "b", xlab = "Lambda", ylab = "Deviance Ratio", main = title)
@@ -292,8 +421,8 @@ generate_advanced_stats_model <- function(data, exclude, selection_type, title) 
 aparam <- c("Rk", "team", "W","L", "PW", "PL", "MOV", "Arena", "wins", "SRS", "ORtg", "DRtg", "NRtg", "TS.", "eFG..1", "eFG.", "FT.FGA")
 aparam_min <- c("Rk", "team", "W","L", "PW", "PL", "MOV", "Arena", "wins", "ORtg", "NRtg", "TS.", "eFG..1", "eFG.")
 
-advanced_stats_lasso_model <- generate_advanced_stats_model(advanced_stats, aparam, 1, "Lasso Model: Lambda vs. Deviance Ratio (AParam)")
-advanced_stats_ridge_model <- generate_advanced_stats_model(advanced_stats, aparam, 0, "Ridge Model: Lambda vs. Deviance Ratio (AParam)")
+#advanced_stats_lasso_model <- generate_advanced_stats_model(advanced_stats, aparam, 1, "Lasso Model: Lambda vs. Deviance Ratio (AParam)")
+#advanced_stats_ridge_model <- generate_advanced_stats_model(advanced_stats, aparam, 0, "Ridge Model: Lambda vs. Deviance Ratio (AParam)")
 
 advanced_stats_lasso_model_min <- generate_advanced_stats_model(advanced_stats, aparam_min, 1, "Lasso Model: Lambda vs. Deviance Ratio (Min AParams)")
 advanced_stats_ridge_model_min <- generate_advanced_stats_model(advanced_stats, aparam_min, 0, "Ridge Model: Lambda vs. Deviance Ratio (Min AParams)")
@@ -373,7 +502,9 @@ predict_on_future_data <- function(future_data, model, exclude, title) {
 	  return(list(predictions = results, residuals = residuals))
 }
 
-
+# NOTE: You can only really pass a Ridge Model to this function "compute_studentized_residuals",
+# Because this function uses the special formula for calculating
+# the Hat matrix that is only true for a Ridge model.
 compute_studentized_residuals <- function(future_data, model, res_vec, exclude, k, pred_vals) {
   # Need the MS_Res of our model on the n data points
   # For every integer i (1 <= i <= n), we need the h_ii, which depends on n, the
@@ -420,9 +551,18 @@ compute_studentized_residuals <- function(future_data, model, res_vec, exclude, 
   stud_res_vec <- (res_vec)/(sqrt(MS_Res * (1-hat_matrix_diag)))
   
   #team_inds <- seq(from=1, to=length(future_data$team), by=1)
-	plot(pred_vals, stud_res_vec, col = "red", xlab = "Predicted values", ylab = "Studentized residuals", main="Studentized residuals versus predicted values")
+	plot(pred_vals, stud_res_vec, col = "red", xlab = "Predicted values", ylab = "Studentized residuals", main="Studentized residuals versus Predicted Y")
 	
+	#leverage_vals <- hat_matrix_diag
+	hat_matrix_diag_bar <- sum(hat_matrix_diag)/hat_diag_len
+	
+	min_x_to_show <- 0.9*min(hat_matrix_diag)
+	max_x_to_show <- max(max(hat_matrix_diag), 1.1*2*hat_matrix_diag_bar)
+	plot(hat_matrix_diag, stud_res_vec, col = "red", xlab = "Leverage values", ylab = "Studentized residuals", xlim = c(min_x_to_show, max_x_to_show), main="Studentized residuals versus Leverage values")
 
+	
+	abline(v = 2*hat_matrix_diag_bar, col="blue")
+	legend("bottomleft", legend = c("x=2h_bar"), pch="|", col="blue")
 	  
 	#points(team_inds, pred_vals, col = "grey")
 	#legend("topright", legend = c("Predicted wins", "Actual Wins"), col = c("red", "grey"), pch=1)
@@ -433,9 +573,9 @@ compute_studentized_residuals <- function(future_data, model, res_vec, exclude, 
 
 
 #residuals_future_lasso <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model, aparam, "Lasso AParam Prediction on Future Data")
-residuals_future_ridge <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model, aparam, "Ridge AParam Prediction on Future Data")
+#residuals_future_ridge <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model, aparam, "Ridge AParam Prediction on Future Data")
 #residuals_future_lasso_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_lasso_model_min, aparam_min, "Lasso Min AParam Prediction on Future Data")
-#residuals_future_ridge_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model_min, aparam_min, "Ridge Min AParam Prediction on Future Data")
+residuals_future_ridge_min <- predict_on_future_data(advanced_stats_2021, advanced_stats_ridge_model_min, aparam_min, "Ridge Min AParam Prediction on Future Data")
 
 # Lambda that the model ended up using:
 # model$lambda[dim(model$beta)[2]]
@@ -443,7 +583,9 @@ residuals_future_ridge <- predict_on_future_data(advanced_stats_2021, advanced_s
 
 
 k <- dim(advanced_stats_ridge_model$beta)[1]
-stud_residuals_future_lasso_min <- compute_studentized_residuals(advanced_stats_2021, advanced_stats_ridge_model, residuals_future_lasso_min$residuals, aparam_min, k, residuals_future_lasso_min$predictions)
+stud_residuals_future_lasso_min <- compute_studentized_residuals(advanced_stats_2021, advanced_stats_ridge_model_min, residuals_future_ridge_min$residuals, aparam_min, k, residuals_future_ridge_min$predictions)
+
+
 # aparm has "SRS", "DRtg", "FT.FGA"
 ```
 ```{r}
