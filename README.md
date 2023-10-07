@@ -90,9 +90,3 @@ the mean, standard deviation, minimum, maximum, and quartiles for each variable.
 4. use the lm function on the vector of beta coefficients and years and plot that line on the plot from step 3
 5. Take note of any jumps in the impact of 3PT shots and attribute it a reason such as a player or shift in
    team paradigms.
-
-TODO:
-
-1. zach unit scaling of the x variables and y
-2. zach can do the multicollinearity and "for every x variable, make a plot of the mean of that x variable across the 20 years."
-3. marco cpi adjustment and put all code in preprocessing rmd file
